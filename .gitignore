@@ -1,0 +1,36 @@
+# ===== 依赖与构建产物 =====
+node_modules/
+dist/
+target/
+*.jar
+*.war
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# ===== Python =====
+__pycache__/
+*.pyc
+venv/
+.venv/
+db.sqlite3
+
+# ===== 系统与压缩包残留 =====
+.DS_Store
+__MACOSX/
+._*
+Thumbs.db
+
+# ===== 数据文件（单文件超过 Git 与 GitHub 上限，不入库）=====
+项目数据/
+data/
+hbase_data/
+yiyao.txt
+t_view_*.txt
+
+# ===== 日志 =====
+*.log
+nohup.out

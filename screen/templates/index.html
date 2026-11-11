@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+	    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+		<title>药品适应症数据大屏</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/app.css" />
+
+	</head>
+	
+	<body class="bg06">
+		<header class="header">
+		<div id='currentTime'></div>
+			<h3>药品适应症数据大屏</h3>
+		</header>
+		
+		<div class="wrapper">
+			<div class="container-fluid">
+				<div class="row fill-h">
+					<div class="col-lg-3 fill-h">
+						<div class="xpanel-wrapper xpanel-wrapper-1-2">
+							<div class="xpanel">
+								<div class="title">用药TOP10</div>
+								<div class="left_right_div" id="drug1"></div>
+							</div>
+						</div>
+						<div class="xpanel-wrapper xpanel-wrapper-1-2">
+							<div class="xpanel">
+								<div class="title">用药分布情况TOP10</div>
+								<div class="left_right_div" id="drug2"></div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 fill-h">
+						<div class="xpanel-wrapper xpanel-wrapper-1">
+							<div class="xpanel no-padding no-bg">
+								<div class="center_title">各省份病例数和用药金额情况</div>
+								<div class="center_div">
+									<div class="title1"></div>
+									<div class="center_div1" id="data_province"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3 fill-h">
+						<div class="xpanel-wrapper xpanel-wrapper-2-3">
+							<div class="xpanel">
+								<div class="title">病症出现次数TOP10</div>
+								<div class="left_right_div" id="data_diseases"></div>
+							</div>
+						</div>
+						<div class="xpanel-wrapper xpanel-wrapper-1-3">
+							<div class="xpanel">
+								<div class="title">药品之间的关联使用情况</div>
+								<div class="left_right_div" id="data_apliori"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
