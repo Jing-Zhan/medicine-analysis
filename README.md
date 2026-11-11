@@ -63,23 +63,61 @@ python manage.py runserver 0.0.0.0:8000
 
 ## 分支约定
 
-| 分支 | 用途 | 谁合并 |
-| --- | --- | --- |
-| `main` | 可运行版本，每次合并前需本地验证 | 组长 |
-| `dev` | 日常集成分支 | 组长 |
-| `feature/T4-data` | MySQL 导入脚本与核对 | 成员 C |
-| `feature/T7-frontend` | 前端联调与打包 | 成员 C |
-| `feature/T8-screen` | 大屏 Django 开发 | 成员 B |
-| `feature/T10-docs` | 文档撰写 | 成员 D |
-| `feature/T12-test` | 测试用例与报告 | 成员 E |
+**一人一分支。** 只在自己的分支上提交，任何人不直接改 `main`。
 
-提交信息格式：`T编号-模块-动作`
+| 分支 | 谁用 | 放什么内容 |
+| --- | --- | --- |
+| `main` | 仅组长合并 | 可运行、可演示的版本 |
+| `feature/A-deploy` | 成员 A | 部署脚本、后端配置、环境文档 |
+| `feature/B-screen` | 成员 B | Hive 表结构记录、Django 大屏工程 |
+| `feature/C-frontend` | 成员 C | MySQL 导入脚本、前端 config 与打包说明 |
+| `feature/D-docs` | 成员 D | 需求规格、数据库设计、概要/详细设计 |
+| `feature/E-test` | 成员 E | 测试用例、测试报告、答辩材料 |
+
+### 日常流程
+
+```bash
+# 1. 切到自己的分支
+git checkout feature/C-frontend
+
+# 2. 每次开始干活前，先拉主干最新代码（防止越积越难合）
+git pull origin main
+
+# 3. 干活……
+
+# 4. 提交并推送
+git add -A
+git commit -m "T4-data-loaddata-verify"
+git push
+```
+
+### 组长合并
+
+每天 21:00 站立会后合并一次。合并前在本地把分支拉下来跑一遍，确认能启动再合：
+
+```bash
+git checkout main
+git pull
+git merge feature/C-frontend --no-ff -m "merge: T4 T7 完成"
+git push
+```
+
+合并后如果发现问题，用 `git revert` 回退，不要用 `reset` 改写已推送的历史。
+
+### 提交信息格式
+
+`T编号-模块-动作`
 
 ```
+T4-data-loaddata-verify
 T6-backend-kylin-config
 T8-screen-province-map
-T4-mysql-loaddata-fix
 ```
+
+### 不要提交这些
+
+`node_modules/`、`dist/`、`target/`、数据文件（约 600MB）、`.idea/`。
+已在 `.gitignore` 中排除，不要用 `git add -f` 强行加入。
 
 ## 团队
 
