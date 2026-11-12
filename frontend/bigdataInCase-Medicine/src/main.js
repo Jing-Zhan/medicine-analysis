@@ -1,17 +1,30 @@
 import Vue from 'vue'
-import App from './App'
+import App from './app'
 import router from './router'
 import './extends/index'
-import '@/config';
+import config from '@/config'
 import http from 'vue-http-rexsheng'
-import basic from './assets/css/css.css'
+import { installMockAdapter } from '@/api'
+import './assets/css/css.css'
+
 Vue.use(http)
 
-require.context("./assets/data/", true, /\.json$/);
+// 接口地址 / mock 开关统一由 src/config.js 控制，部署时只改那一个文件
+Vue.config.testMode = http.ajax.config.mockMode = false;
+Vue.config.apiPrefix = http.ajax.config.baseUrl = config.baseUrl;
+Vue.config.baseUrl = config.baseUrl;
+Vue.config.useMock = config.useMock;
+http.ajax.config.default = {
+    timeout: 30000,
+    type: "get"
+}
 
-    /**
-     * 系统入口
-     */
+// 接口未通时用前端假数据渲染（开关在 src/config.js 的 useMock）
+installMockAdapter()
+
+/**
+ * 系统入口
+ */
 new Vue({
     el: '#app',
     router,

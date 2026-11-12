@@ -1,11 +1,17 @@
-import Vue from 'vue'
-import http from 'vue-http-rexsheng'
-let config = Vue.config;
+/**
+ * 全局配置
+ * ============================================================
+ * 部署时只需要改下面的 baseUrl 这一处，其它代码都引用这个变量。
+ */
+export default {
+    // 后端接口地址（联调 / 部署时改这里）
+    baseUrl: 'http://192.168.207.179:83',
 
-config.testMode=http.ajax.config.mockMode = false; //是否使用mock模式
-config.apiPrefix=http.ajax.config.baseUrl = "http://192.168.8.63:83"; // 发起ajax请求的路径前缀
-http.ajax.config.default={
-    timeout:30000,
-    type:"get"
-}
-export default config;
+    // 是否使用前端假数据：
+    //   true  —— 接口还没通，图表用 src/mock 里的假数据渲染（当前阶段）
+    //   false —— 走真实接口，地址取上面的 baseUrl
+    useMock: true,
+
+    // 假数据模拟的延时（毫秒），用来模拟请求过程
+    mockDelay: 100
+};

@@ -54,6 +54,8 @@ npm run dev          # 本地调试，端口 8083
 npm run build        # 产物在 dist/
 ```
 
+接口没通时，图表自动走前端假数据（`src/config.js` 的 `useMock`），页面不会白屏；接口通了把 `useMock` 改成 `false` 即可。详见 [前端说明](frontend/bigdataInCase-Medicine/README.md)。
+
 ### 3. 大屏
 
 ```bash

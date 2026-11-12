@@ -8,8 +8,8 @@
 <script>
 import Vue from 'vue'
 import ECharts from 'vue-echarts'
-import 'echarts/lib/chart/line'
-import 'echarts/lib/chart/bar'
+import 'echarts/lib/chart/pie'
+import 'echarts/lib/component/legend'
 export default {
   components: {
         echart:ECharts
@@ -24,58 +24,31 @@ export default {
     return {
         nodata:false,
         option:{
-            color:['#6ecbbc'],
-            grid:{
-                top:10,
-                left: 10,
-                right: 10
+            color:['#6ecbbc','#7bb6ef','#f7a25a','#b5a2de','#de7984','#5fccc3','#e7d352'],
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}：{c} ({d}%)'
             },
-            tooltip: {},
-            xAxis: {
-                type: 'category',
-                data: [],
-                axisTick: {
-                        show: false
-                },
-                axisLine: {
-                    show: true,
-                    lineStyle : {
-                        color : '#c4d6e7'
-                    } 
-                },
-                axisLabel:{
-                    show : true,
-                    lineStyle : {
-                        color : '#c4d6e7'
-                    },
-                    interval:0,
-                    rotate:40,
-                    formatter:function(value){
-                        if(value.length>6){
-                            return value.slice(0,6)+'...'
-                        }  else {
-                            return value;
-                        } 
-                    }
-                },
-                splitLine:{ show : false}
-            },
-            yAxis: {
-                type: 'value',
-                axisTick: {
-                    show: false
-                },
-                axisLine: {
-                    show: false
-                },
-                axisLabel:{
-                    show : false
-                },
-                splitLine:{ show : false}
+            legend: {
+                orient: 'vertical',
+                right: 10,
+                top: 'middle',
+                textStyle:{
+                    color:'#364554'
+                }
             },
             series: [{
-                data: [],
-                type: 'bar'
+                type: 'pie',
+                radius: ['38%', '68%'],
+                center: ['38%', '56%'],
+                avoidLabelOverlap: true,
+                label: {
+                    normal: {
+                        formatter: '{b}\n{d}%',
+                        color:'#364554'
+                    }
+                },
+                data: []
             }]
         }
     };
@@ -98,22 +71,23 @@ export default {
                 success: function(data) {
                     if (!!data && data.code=='200') {
                          if(data.data.length>0){
-                             var data1=[],data2=[];    
-                            data.data.forEach(element => {
-                                data1.push(element.SectionName);
-                                data2.push(element.Counter);
-                            });
-                            self.option.xAxis.data=data1;
-                            self.option.series[0].data=data2;
+                             var pieData=[];
+                             data.data.forEach(element => {
+                                 pieData.push({
+                                     name: element.SectionName,
+                                     value: element.Counter
+                                 });
+                             });
+                            self.option.series[0].data=pieData;
                             self.$refs.case.hideLoading();
                          }else{
                             self.$refs.case.hideLoading();
                             self.nodata=true;
                         }
-                        
+
                     }
                 }
-            }); 
+            });
         }
     }
 };

@@ -1,5 +1,6 @@
 <template>
     <div>
+        <overview></overview>
         <div class="main clearfix">
             <citylevel></citylevel>
             <div class="main-right">
@@ -12,12 +13,14 @@
 </template>
 <script>
 import Vue from 'vue'
+import overview from  '@/components/home/charts/overview'
 import citylevel from  '@/components/home/charts/citylevel'
 import age from  '@/components/home/charts/age'
 import drugTop from  '@/components/home/charts/drugTop'
 import province from  '@/components/home/charts/province'
 export default {
   components: {
+    overview: overview,
     'citylevel': citylevel,
     age:age,
     'drugtop':drugTop,
