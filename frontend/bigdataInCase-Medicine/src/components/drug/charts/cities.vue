@@ -1,25 +1,14 @@
 <template>
     <div class="city chart">
         <div class="case-title">药品品牌覆盖城市图</div>
-        <echart ref="case" class="case-chart" :options="option"  autoresize/>
+        <echart ref="case" class="case-chart" :options="option" autoresize/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
 <script>
 import Vue from 'vue'
 import ECharts from 'vue-echarts'
-import geoCoordMap from 'echarts/map/json/china-cities.json'
-import mapStyle from '../../../../static/mapStyle.json'
-import 'echarts/lib/chart/scatter'
-import 'echarts/lib/chart/effectScatter'
-import 'echarts/lib/chart/map'
-import 'echarts/map/js/world'
-import 'echarts/map/js/china'
-import chinaMap from 'echarts/map/json/china'
-import 'echarts/extension/bmap/bmap'
-import 'echarts/extension/dataTool/index'
-// registering map data
-ECharts.registerMap('china', chinaMap)
+import 'echarts/lib/chart/bar'
 export default {
   components: {
         echart:ECharts
@@ -31,50 +20,75 @@ export default {
         },
     },
   data() {
-    return {    
+    return {
         nodata:false,
         option:{
-            tooltip : {
-                trigger: 'item',
-                formatter: function (params, ticket, callback) {
-                    return params.name+'：'+params.value[2]
+            color:['#5ab2ef'],
+            grid:{
+                top:20,
+                bottom:70,
+                left:60,
+                right:30
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
                 }
             },
-            bmap: {
-                center: [120.33,36.07],
-                zoom: 7,
-                roam: true,
-                mapStyle: mapStyle
-            },
-            series : [
-                {
-                    name: '人参药酒药品覆盖城市',
-                    type: 'scatter',
-                    coordinateSystem: 'bmap',
-                    data:[],
-                    symbolSize:14,
-                    // symbolSize: function (val) {
-                    //     return Math.sqrt(val[2]);                        
-                    // },
-                    label: {
-                        normal: {
-                            formatter: '{b}',
-                            position: 'right',
-                            show: false,                            
-                        },
-                        emphasis: {
-                            show: true,
-                            color:'#000000'
-                        }
-                    },
-                    itemStyle: {
-                        normal: {
-                            color: '#3085fe',
-                            opacity:1
+            xAxis: {
+                type: 'category',
+                data: [],
+                axisTick: {
+                    show: false
+                },
+                axisLine: {
+                    show: true,
+                    lineStyle : {
+                        color : '#c4d6e7'
+                    }
+                },
+                axisLabel:{
+                    show: true,
+                    color:'#364554',
+                    interval:0,
+                    rotate:30,
+                    formatter:function(value){
+                        if(value.length>4){
+                            return value.slice(0,4)+'...'
+                        }  else {
+                            return value;
                         }
                     }
                 }
-            ]
+            },
+            yAxis: {
+                type: 'value',
+                axisTick: {
+                    show: false
+                },
+                axisLine: {
+                    show: false
+                },
+                axisLabel:{
+                    show: true,
+                    color:'#364554'
+                },
+                splitLine:{
+                    lineStyle:{
+                        color:'#ebedf6'
+                    }
+                }
+            },
+            series: [{
+                name: '覆盖医院数',
+                type: 'bar',
+                barMaxWidth: 26,
+                itemStyle:{
+                    barBorderRadius:4
+                },
+                data: []
+            }]
         }
     }
   },
@@ -94,40 +108,23 @@ export default {
                 url: "/drug/cities?keyword="+self.keyword,
                 data: {},
                 success: function(data) {
-                     if (!!data && data.code=='200') {  
+                     if (!!data && data.code=='200') {
                         if(data.data.length>0){
-                            self.option.series[0].data=self.convertData(data.data);
+                            var names=[],counters=[];
+                            data.data.forEach(function(item){
+                                names.push(item.Name);
+                                counters.push(item.Counter);
+                            })
+                            self.option.xAxis.data=names;
+                            self.option.series[0].data=counters;
                             self.$refs.case.hideLoading();
                         }else{
                             self.$refs.case.hideLoading();
                             self.nodata=true;
                         }
-                     }                    
+                     }
                 }
-            }); 
-        },
-        convertData:function (data) {
-            var res = [];
-                
-            var newArr=[];
-            geoCoordMap.features.forEach(element => {
-                newArr.push(element.properties)
             });
-            for (var i = 0; i < data.length; i++) {
-                var geoCoord='';
-                if(data[i].Name.indexOf('市')>0){
-                    geoCoord = newArr.findProperty('name',data[i].Name.replace('市','')).cp;
-                }else if(newArr.findProperty('name',data[i].Name)){
-                    geoCoord = newArr.findProperty('name',data[i].Name).cp;
-                }             
-                if (geoCoord) {
-                    res.push({
-                        name: data[i].Name,
-                        value: geoCoord.concat(data[i].Counter)
-                    });
-                }
-            }
-            return res;
         }
     }
 };

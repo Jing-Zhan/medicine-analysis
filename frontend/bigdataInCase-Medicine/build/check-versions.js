@@ -5,7 +5,12 @@ const packageConfig = require('../package.json')
 const shell = require('shelljs')
 
 function exec (cmd) {
-  return require('child_process').execSync(cmd).toString().trim()
+  try {
+    return require('child_process').execSync(cmd, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch (e) {
+    // 受限环境（无子进程权限）里取不到版本号时返回 null，跳过该校验，不阻塞打包
+    return null
+  }
 }
 
 const versionRequirements = [
@@ -17,11 +22,14 @@ const versionRequirements = [
 ]
 
 if (shell.which('npm')) {
-  versionRequirements.push({
-    name: 'npm',
-    currentVersion: exec('npm --version'),
-    versionRequirement: packageConfig.engines.npm
-  })
+  const npmVersion = exec('npm --version')
+  if (npmVersion) {
+    versionRequirements.push({
+      name: 'npm',
+      currentVersion: npmVersion,
+      versionRequirement: packageConfig.engines.npm
+    })
+  }
 }
 
 module.exports = function () {
