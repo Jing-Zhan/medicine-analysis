@@ -93,6 +93,8 @@ static/                       模板遗留静态资源（打包时原样复制�
 | 报错 | 原因 | 处理 |
 | --- | --- | --- |
 | `Unexpected token` / 编译直接失败 | Node 版本过高 | 降到 14.16.1 |
+| `EPERM: operation not permitted, mkdir '...\AppData\Roaming\npm'` | 用户级 `~/.npmrc` 里的 `prefix` 指向一个建不出来的目录（安全软件或权限策略拦截） | 把 `prefix` 改成可写路径，如 `npm config set prefix D:\npm-global`；`cache` 同理 |
+| `npm update check failed` 黄框 | npm 6 的更新检查写 `~/.config` 失败，不影响构建 | 在 `~/.npmrc` 加一行 `update-notifier=false` |
 | `JavaScript heap out of memory` | 内存不够 | 见上面 `NODE_OPTIONS` |
 | `Module not found` | 依赖没装全 | 删掉 `node_modules` 重新 `npm install` |
 | 图表空着、只有 loading | 接口没通 | 确认 `src/config.js` 的 `useMock`/`baseUrl` |
