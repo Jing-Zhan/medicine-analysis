@@ -1,0 +1,6 @@
+# 大屏最小依赖（PyMySQL 是纯 Python 实现，不需要编译 mysqlclient）
+Django==4.2.16
+PyMySQL==1.1.1
+
+# 如果 MySQL 是 8.0 且账号使用 caching_sha2_password 认证，再装这一行：
+# cryptography==42.0.8
