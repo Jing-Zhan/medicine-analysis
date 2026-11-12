@@ -30,7 +30,8 @@ medicine-analysis/
 └── docs/
     ├── 环境信息卡.md                    服务器地址、账号、端口
     ├── 任务看板.md                      T1—T12 任务与状态
-    └── 数据集说明.md                    数据文件位置与导入方式
+    ├── 数据集说明.md                    数据文件位置与导入方式
+    └── T7-前端跑通与打包说明.md         T7 改动清单、13 组件走查、联调与遗留问题
 ```
 
 ## 快速开始
@@ -54,7 +55,7 @@ npm run dev          # 本地调试，端口 8083
 npm run build        # 产物在 dist/
 ```
 
-接口没通时，图表自动走前端假数据（`src/config.js` 的 `useMock`），页面不会白屏；接口通了把 `useMock` 改成 `false` 即可。详见 [前端说明](frontend/bigdataInCase-Medicine/README.md)。
+接口没通时，图表自动走前端假数据（`src/config.js` 的 `useMock`），页面不会白屏；接口通了把 `useMock` 改成 `false` 即可。详见 [前端说明](frontend/bigdataInCase-Medicine/README.md) 与 [T7 改动说明](docs/T7-前端跑通与打包说明.md)。
 
 ### 3. 大屏
 
