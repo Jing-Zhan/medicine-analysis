@@ -1,0 +1,27 @@
+-- ============================================================
+-- yiyao 维表清洗：去掉文本字段末尾的回车/换行符（CR / LF）
+--
+-- 背景：
+--   原始数据来自 Windows 环境，文本字段末尾带 \r\n。
+--   载入 MySQL 后换行被截掉，但回车符 \r 留在了字段里，例如
+--   t_view_section.section_name1 = '预防保健科\r'（16 字节 / 6 字符）。
+--   前端表格里会显示成多余的方块，JSON 里也会出现 "中医科\r"。
+--
+--   事实表 prescription_diseases 不做处理：它不含需要展示的文本名，
+--   且 100 万行改一遍代价高，没有必要。
+--
+-- 生成执行语句的方式（避免手写几十列）：
+--   mysql -N -B -uroot -pXXXXXX <<'EOF' > /tmp/clean_cr.sql
+--   SELECT CONCAT('UPDATE `',TABLE_NAME,'` SET `',COLUMN_NAME,'`=REPLACE(REPLACE(`',
+--                 COLUMN_NAME,'`,CHAR(13),""),CHAR(10),"") WHERE `',COLUMN_NAME,
+--                 '`<>REPLACE(REPLACE(`',COLUMN_NAME,'`,CHAR(13),""),CHAR(10),"");')
+--   FROM information_schema.COLUMNS
+--   WHERE TABLE_SCHEMA='yiyao' AND TABLE_NAME LIKE 't_view_%'
+--     AND DATA_TYPE IN ('varchar','mediumtext','text');
+--   EOF
+--   mysql -uroot -pXXXXXX --force yiyao < /tmp/clean_cr.sql
+-- ============================================================
+
+-- 校验：两个查询都应该返回 0
+-- SELECT COUNT(*) FROM t_view_section WHERE section_name1 LIKE CONCAT('%',CHAR(13),'%');
+-- SELECT COUNT(*) FROM t_view_drug    WHERE drug_generic_name LIKE CONCAT('%',CHAR(13),'%');

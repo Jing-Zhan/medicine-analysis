@@ -175,7 +175,7 @@ public class DiseaseService {
 		}
 		//查询立方体语句
 		String sql = "SELECT " +
-				" PRESCRIPTION_DISEASES.AGE as \"age\",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as char) else cast(20 as char) end as \"sex\",count(0) as \"counter\" " +
+				" PRESCRIPTION_DISEASES.AGE as \"age\",PRESCRIPTION_DISEASES.M_SEX as \"sex\",count(0) as \"counter\" " +
 				"  FROM BIGDATA.PRESCRIPTION_DISEASES as PRESCRIPTION_DISEASES" +
 				" LEFT JOIN BIGDATA.SECTION as SECTION" +
 				" ON PRESCRIPTION_DISEASES.M_SECTION = SECTION.SECTION2" +
@@ -188,7 +188,7 @@ public class DiseaseService {
 				" INNER JOIN BIGDATA.HOSP_AREA as HOSP_AREA" +
 				" ON HOSPITAL.HOSP_ID = HOSP_AREA.HOSP_ID" +
 				" WHERE 1=1 " + where + " and DRUG.DRUG_GENERIC_NAME!='' " +
-				" group by PRESCRIPTION_DISEASES.AGE order by count(0) desc limit 20";
+				" group by PRESCRIPTION_DISEASES.AGE,PRESCRIPTION_DISEASES.M_SEX order by count(0) desc limit 20";
 		//执行kylin查询，返回结果
 		return beanFactory.getBean(KylinUtil.class).QueryForList(sql);
 
@@ -243,7 +243,7 @@ public class DiseaseService {
 	public CityLevelTotalOutput cityLevelCompetation() throws Exception {
 		//查询立方体语句
 		String sql = "SELECT " +
-				"CONCAT('201',SUBSTRING(PRESCRIPTION_DISEASES.RECORD_ID,CHAR_LENGTH(PRESCRIPTION_DISEASES.RECORD_ID))) as \"year\" " +
+				"CAST(PRESCRIPTION_DISEASES.YEAR_MONTH AS CHAR) as \"year\" " +
 				" ,HOSP_AREA.CITY_LEVEL_NAME as \"level\" " +
 				" ,sum(PRESCRIPTION_DISEASES.PRICE) as \"price\" " +
 				" ,sum(PRESCRIPTION_DISEASES.AMOUNT) as \"amount\", " +
@@ -260,8 +260,8 @@ public class DiseaseService {
 				" INNER JOIN BIGDATA.HOSP_AREA as HOSP_AREA " +
 				" ON HOSPITAL.HOSP_ID = HOSP_AREA.HOSP_ID " +
 				" WHERE 1=1  " +
-				" group by SUBSTRING(PRESCRIPTION_DISEASES.RECORD_ID,CHAR_LENGTH(PRESCRIPTION_DISEASES.RECORD_ID)),HOSP_AREA.CITY_LEVEL_NAME " +
-				" order by SUBSTRING(PRESCRIPTION_DISEASES.RECORD_ID,CHAR_LENGTH(PRESCRIPTION_DISEASES.RECORD_ID)),HOSP_AREA.CITY_LEVEL_NAME";
+				" group by PRESCRIPTION_DISEASES.YEAR_MONTH,HOSP_AREA.CITY_LEVEL_NAME " +
+				" order by PRESCRIPTION_DISEASES.YEAR_MONTH,HOSP_AREA.CITY_LEVEL_NAME";
 		//执行kylin查询
 		List<Map<String, Object>> searchResult = beanFactory.getBean(KylinUtil.class).QueryForList(sql);
 		List<CityLevelOutput> output = new ArrayList<>();
@@ -322,7 +322,7 @@ public class DiseaseService {
 		//查询立方体语句
 		String sql = "SELECT " +
 				"PRESCRIPTION_DISEASES.AGE as \"age\" " +
-				",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as char) else cast(20 as char) end as \"sex\" " +
+				",PRESCRIPTION_DISEASES.M_SEX as \"sex\" " +
 				",sum(PRESCRIPTION_DISEASES.PRICE) as \"price\" " +
 				",sum(PRESCRIPTION_DISEASES.AMOUNT) as \"amount\", " +
 				"count(0) as \"counter\" " +
@@ -338,7 +338,7 @@ public class DiseaseService {
 				"INNER JOIN BIGDATA.HOSP_AREA as HOSP_AREA " +
 				"ON HOSPITAL.HOSP_ID = HOSP_AREA.HOSP_ID " +
 				"WHERE 1=1  " +
-				"group by PRESCRIPTION_DISEASES.AGE " +
+				"group by PRESCRIPTION_DISEASES.AGE,PRESCRIPTION_DISEASES.M_SEX " +
 				"order by PRESCRIPTION_DISEASES.AGE ";
 		//执行kylin查询
 		List<Map<String, Object>> searchResult = beanFactory.getBean(KylinUtil.class).QueryForList(sql);
