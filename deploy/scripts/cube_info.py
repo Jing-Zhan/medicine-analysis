@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """打印 Kylin Cube 的真实维度、度量与查找表清单。
 
-注意接口选择：
-    /api/cubes?cubeName=...     → 只返回列表摘要，dimensions 为空（踩过的坑）
-    /api/cube/{cubeName}        → 返回完整描述，含 dimensions / measures / lookups
+注意接口选择（踩过两次坑）：
+    /api/cubes?cubeName=...     → 只返回列表摘要，dimensions 为空
+    /api/cube/{cubeName}        → Kylin 2.x 的路径，3.1.1 上返回 404
+    /api/cubes/{cubeName}       → Kylin 3.x 正确路径，返回完整描述
 
 用法（在 master 上）：
     python3 cube_info.py                 # 默认 bi_cube / 项目 yiyao
@@ -19,18 +20,30 @@ CUBE = sys.argv[1] if len(sys.argv) > 1 else "bi_cube"
 PROJ = sys.argv[2] if len(sys.argv) > 2 else "yiyao"
 BASE = "http://master:7070/kylin"
 
-url = "%s/api/cube/%s?projectName=%s" % (BASE, CUBE, PROJ)
-req = urllib.request.Request(url)
-token = base64.b64encode(b"ADMIN:KYLIN").decode()
-req.add_header("Authorization", "Basic " + token)
-req.add_header("Accept", "application/json")
+# 候选路径，按顺序试，第一个返回 200 的胜出
+CANDIDATES = [
+    "/api/cubes/%s?projectName=%s" % (CUBE, PROJ),
+    "/api/cube/%s?projectName=%s" % (CUBE, PROJ),
+    "/api/cubes?cubeName=%s&projectName=%s" % (CUBE, PROJ),
+]
 
-try:
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        body = json.loads(resp.read().decode("utf-8"))
-except Exception as exc:                              # noqa: BLE001
-    print("请求失败：%s: %s" % (type(exc).__name__, exc))
-    print("URL: %s" % url)
+_token = base64.b64encode(b"ADMIN:KYLIN").decode()
+body = None
+for path in CANDIDATES:
+    url = BASE + path
+    req = urllib.request.Request(url)
+    req.add_header("Authorization", "Basic " + _token)
+    req.add_header("Accept", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+        print("命中接口：%s" % path)
+        break
+    except Exception as exc:                            # noqa: BLE001
+        print("尝试 %s → %s: %s" % (path, type(exc).__name__, exc))
+
+if body is None:
+    print("三个候选接口都失败，请手动打开 Kylin 控制台确认 Cube 名称")
     sys.exit(1)
 
 # 兼容两种返回结构：描述符在顶层，或包在 descriptor 里
