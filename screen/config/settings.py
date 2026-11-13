@@ -1,11 +1,11 @@
 """
-Django 閰嶇疆 鈥斺€?鑽搧鍙鍖栧ぇ灞忥紙5 寮犲浘锛?
+# Django 配置 —— 药品可视化大屏（5 张图）
 
-璁捐瑕佺偣锛?
-1. 鏈」鐩笉浣跨敤 Django ORM / 涓嶅缓琛紝MySQL 閲岀殑 6 寮犱笟鍔¤〃鏄閮ㄦ棦鏈夌殑锛?
-   鎵€浠?DATABASES 淇濈暀涓€涓?sqlite 鍙槸涓轰簡婊¤冻 Django 鐨勫惎鍔ㄨ姹傘€?
-2. 鐪熸鐨勬暟鎹闂蛋 dashboard/db.py 閲岀殑 PyMySQL 鐩磋繛銆?
-3. 鎵€鏈夎繛鎺ュ弬鏁伴兘鍙敤鐜鍙橀噺瑕嗙洊锛屾柟渚垮湪铏氭嫙鏈?/ 鏈満涔嬮棿鍒囨崲銆?
+# 设计要点：
+# 1. 本项目不使用 Django ORM / 不建表，MySQL 里的 6 张业务表是外部既有的；
+#    所以 DATABASES 只保留一个占位后端，仅用于满足 Django 的启动检查。
+# 2. 真正的数据访问走 dashboard/db.py 里的 PyMySQL 直连。
+# 3. 所有连接参数都可以用环境变量覆盖，方便在虚拟机 / 本机之间切换。
 """
 import os
 from pathlib import Path
@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-yiyao-screen-2026")
 
-# 澶у睆閮ㄧ讲鍦ㄨ櫄鎷熸満閲岋紝鐢?IP 璁块棶锛屾墍浠?DEBUG 榛樿寮€銆丠OST 鏀惧紑
+# 大屏部署在虚拟机里，用 IP 访问，所以 DEBUG 默认开、HOST 放开
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = ["*"]
 
@@ -45,12 +45,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# 涓嶄娇鐢?ORM锛岃繖閲屽彧鏄 Django 鑳芥甯稿惎鍔?
+# 不使用 ORM，这里只是让 Django 能正常启动
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        # 系统自带 SQLite 为 3.7.17，低于 Django 3.2 要求的 3.9.0，直接用 sqlite3 后端会启动失败。
+        # 本项目不走 ORM（取数全部由 dashboard/db.py 里的 PyMySQL 直连完成），
+        # 因此用 dummy 后端占位：Django 能正常启动，误用 ORM 时会明确报错而不是悄悄连错库。
+        "ENGINE": "django.db.backends.dummy",
     }
+}
 }
 
 LANGUAGE_CODE = "zh-hans"
@@ -64,5 +67,5 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# 鎺ュ彛缁撴灉缂撳瓨绉掓暟锛岄伩鍏嶅ぇ灞忓埛鏂版椂鍙嶅鍘?MySQL锛堣 0 鍙叧闂級
+# 接口结果缓存秒数，避免大屏刷新时反复查 MySQL（设 0 可关闭）
 CACHE_TTL = int(os.environ.get("CACHE_TTL", "60"))
