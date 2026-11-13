@@ -5,12 +5,15 @@
  */
 export default {
     // 后端接口地址（联调 / 部署时改这里）
-    baseUrl: 'http://192.168.207.179:83',
+    // 留空 = 和当前页面同源：页面从哪个地址打开，就从哪个地址调接口。
+    // 本项目把 dist 放进后端 jar 的 static 目录、由 83 端口一起提供，
+    // 所以留空即可；既不用配跨域，也不怕换 IP（localhost / 192.168.x.x 都可用）。
+    baseUrl: '',
 
     // 是否使用前端假数据：
-    //   true  —— 接口还没通，图表用 src/mock 里的假数据渲染（当前阶段）
-    //   false —— 走真实接口，地址取上面的 baseUrl
-    useMock: true,
+    //   true  —— 接口还没通，图表用 src/mock 里的假数据渲染
+    //   false —— 走真实接口，地址取上面的 baseUrl（部署版必须是 false）
+    useMock: false,
 
     // 假数据模拟的延时（毫秒），用来模拟请求过程
     mockDelay: 100
