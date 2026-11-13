@@ -2,9 +2,11 @@ package com.yiyao.controller;
 
 import com.yiyao.output.AgeOutput;
 import com.yiyao.output.CityLevelTotalOutput;
+import com.yiyao.output.OverviewOutput;
 import com.yiyao.output.WebResult;
 import com.yiyao.service.DiseaseService;
 import com.yiyao.service.DrugService;
+import com.yiyao.service.OverviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,26 @@ public class HomeController {
 	 */
 	@Autowired
 	private DrugService drugService;
+
+	/**
+	 * 首页概览指标接口
+	 */
+	@Autowired
+	private OverviewService overviewService;
+
+	/**
+	 * 首页概览 6 个指标卡片
+	 */
+	@GetMapping("/overview")
+	public WebResult<List<OverviewOutput>> overview() {
+		try {
+			return new WebResult<>(overviewService.overview());
+		} catch (Exception e) {
+			e.printStackTrace();
+			//返回异常结果
+			return new WebResult(e);
+		}
+	}
 
 	@GetMapping("/citylevel")
 	public WebResult<CityLevelTotalOutput> cityLevel() {
