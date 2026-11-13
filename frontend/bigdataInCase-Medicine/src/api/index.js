@@ -16,7 +16,12 @@ import config from '@/config'
 import mock from '@/mock'
 
 // 请求超时后回退假数据的时间（毫秒）
-const FALLBACK_TIMEOUT = 8000
+//
+// 这是联调期的兜底，不是正常路径。最初的 8 秒太短：12 个接口都要把 100 万行事实表
+// 跟维表做关联，实测 2~14 秒，8 秒一到就把「还在算」误判成「接口挂了」，直接把真实
+// 数据换成假数据，首页出现过「概览卡片是真的、下面三张图是假的」这种混杂状态。
+// 部署版放宽到 60 秒，只有请求真的失败（网络错误或超时）才回退。
+const FALLBACK_TIMEOUT = 60000
 
 // 原始 send（走 vue-http-rexsheng 的真实实现）
 let nativeSend = null
@@ -98,7 +103,9 @@ export function installMockAdapter() {
                 if (data && data.code == '200') {
                     done(data)
                 } else {
-                    fallback()
+                    // 后端明确回了错误（如 code=1 的 SQL 异常）时，把真实响应交给组件，
+                    // 不再用假数据顶替——否则界面看起来正常，实际展示的是编造的数字。
+                    done(data || { code: '200', data: [] })
                 }
             },
             error: fallback
