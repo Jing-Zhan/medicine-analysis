@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | Hadoop 集群 | ✅ 运行中 | ZooKeeper / HDFS / YARN / HBase / Hive metastore / Kylin 六个组件 |
 | MySQL 明细库 | ✅ 100 万行 | 库 `yiyao`，6 张表，已建 9 个索引 |
-| Kylin 立方体 | ✅ READY | Cube `bi_cube`，8 维 4 度量，2.95 GB |
+| Kylin 立方体 | ✅ READY | Cube `bi_cube`，8 个维度、2 个度量，2.95 GB |
 | 后端 13 个接口 | ✅ 全部返回真实数据 | 端口 83 |
 | 前端页面 | ✅ 可访问 | 打包进后端 jar，与接口同源 |
 | Django 大屏 | ✅ 5 张图 | 端口 8000 |
@@ -103,7 +103,7 @@ bash /opt/env-status.sh
   ├─► MySQL yiyao（明细库，100 万行）──► SpringBoot 13 接口 ──► Vue 前端（83 端口，同源）
   │                                    └─► Django 大屏（8000 端口，PyMySQL 直连）
   │
-  └─► HDFS ──► Hive 外部表 ──► Kylin Cube bi_cube（8 维 4 度量，READY，2.95 GB）
+  └─► HDFS ──► Hive 外部表 ──► Kylin Cube bi_cube（8 个维度、2 个度量，READY，2.95 GB）
                                     └─► 预计算链路验证；业务查询经 query.engine 配置切换
 ```
 
