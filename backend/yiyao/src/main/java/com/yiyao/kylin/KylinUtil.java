@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
  *   BIGDATA.HOSPITAL              → t_view_hosp
  *   BIGDATA.HOSP_AREA             → t_view_areas
  *   M_DIAGNOSTIC                  → m_diagnostic1   （MySQL 里这一列的列名不同）
+ *   PRESCRIPTION_DISEASES.AGE     → PRESCRIPTION_DISEASES.m_age （同上）
  *   M_DRUG = DRUG.DRUG            → DRUG_CODE = DRUG.DRUG
  *       （明细表里药品码形如 DM0000178036_2，维表里是 DM0000178036，
  *         MySQL 侧用一个生成列 drug_code 去掉后缀并建索引，保证关联走索引）
@@ -169,9 +170,16 @@ public class KylinUtil {
 		m.appendTail(sb);
 		s = sb.toString();
 
-		// ③ 诊断列名：M_DIAGNOSTIC → m_diagnostic1
+		// ③ 事实表列名差异：立方体侧叫 AGE，MySQL 明细库里叫 m_age
+		//    只改带 PRESCRIPTION_DISEASES 限定的写法，避免误伤别人家的 AGE 列
+		s = s.replaceAll("(?i)\\bPRESCRIPTION_DISEASES\\.AGE\\b", "PRESCRIPTION_DISEASES.m_age");
+
+		// ④ 诊断列名：M_DIAGNOSTIC → m_diagnostic1
 		//    用词边界，避免把 M_DIAGNOSTIC2 / M_DIAGNOSTIC3 也换掉
 		s = s.replaceAll("(?i)\\bM_DIAGNOSTIC\\b", "m_diagnostic1");
+
+		// ⑤ MySQL 的 CAST 不接受不带长度的 VARCHAR，换成等价的 CHAR
+		s = s.replaceAll("(?i)\\bVARCHAR\\b", "CHAR");
 
 		return s;
 	}

@@ -175,7 +175,7 @@ public class DiseaseService {
 		}
 		//查询立方体语句
 		String sql = "SELECT " +
-				" PRESCRIPTION_DISEASES.AGE as \"age\",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as varchar) else cast(20 as varchar) end as \"sex\",count(0) as \"counter\" " +
+				" PRESCRIPTION_DISEASES.AGE as \"age\",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as char) else cast(20 as char) end as \"sex\",count(0) as \"counter\" " +
 				"  FROM BIGDATA.PRESCRIPTION_DISEASES as PRESCRIPTION_DISEASES" +
 				" LEFT JOIN BIGDATA.SECTION as SECTION" +
 				" ON PRESCRIPTION_DISEASES.M_SECTION = SECTION.SECTION2" +
@@ -243,7 +243,7 @@ public class DiseaseService {
 	public CityLevelTotalOutput cityLevelCompetation() throws Exception {
 		//查询立方体语句
 		String sql = "SELECT " +
-				"'201'+SUBSTRING(PRESCRIPTION_DISEASES.RECORD_ID,CHAR_LENGTH(PRESCRIPTION_DISEASES.RECORD_ID)) as \"year\" " +
+				"CONCAT('201',SUBSTRING(PRESCRIPTION_DISEASES.RECORD_ID,CHAR_LENGTH(PRESCRIPTION_DISEASES.RECORD_ID))) as \"year\" " +
 				" ,HOSP_AREA.CITY_LEVEL_NAME as \"level\" " +
 				" ,sum(PRESCRIPTION_DISEASES.PRICE) as \"price\" " +
 				" ,sum(PRESCRIPTION_DISEASES.AMOUNT) as \"amount\", " +
@@ -322,7 +322,7 @@ public class DiseaseService {
 		//查询立方体语句
 		String sql = "SELECT " +
 				"PRESCRIPTION_DISEASES.AGE as \"age\" " +
-				",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as varchar) else cast(20 as varchar) end as \"sex\" " +
+				",case when mod(PRESCRIPTION_DISEASES.AGE,2)>0 then cast(10 as char) else cast(20 as char) end as \"sex\" " +
 				",sum(PRESCRIPTION_DISEASES.PRICE) as \"price\" " +
 				",sum(PRESCRIPTION_DISEASES.AMOUNT) as \"amount\", " +
 				"count(0) as \"counter\" " +

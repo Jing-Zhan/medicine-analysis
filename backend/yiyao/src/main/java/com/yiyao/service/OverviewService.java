@@ -43,7 +43,9 @@ public class OverviewService {
 		double totalAmount = 0D;
 		long hospCnt = 0L;
 
-		// ① 立方体：只查事实表
+		// ① 事实表指标：处方总数 / 销售总额 / 覆盖医院
+		//    这条 SQL 只查事实表、不 JOIN 维表，所以 Kylin 和 MySQL 两种引擎都能跑；
+		//    实际由 query.engine 决定落到哪个库，SQL 本身不需要区分。
 		try {
 			String sql = "SELECT" +
 					" COUNT(1) AS \"rowsCnt\"," +
@@ -119,7 +121,13 @@ public class OverviewService {
 		}
 	}
 
-	private double round2(double v) {
-		return BigDecimal.valueOf(v).setScale(2, RoundingMode.HALF_UP).doubleValue();
+	/**
+	 * 保留两位小数。
+	 * 这里必须返回 BigDecimal 而不是 double：
+	 * double 序列化成 JSON 时，26239620.54 会被 Jackson 输出为科学计数法 2.623962054E7，
+	 * 首页卡片就会显示成一行看不懂的数字。BigDecimal 按原样输出。
+	 */
+	private BigDecimal round2(double v) {
+		return BigDecimal.valueOf(v).setScale(2, RoundingMode.HALF_UP);
 	}
 }
