@@ -78,8 +78,19 @@ fi
 
 # ------------------------------------------------------------ 3. 后端
 step "3/5 后端接口（83）"
+# 如果 jar 比运行中的进程新，说明刚重新编译过，必须重启才会生效
+BK_PID=$(ss -lntp 2>/dev/null | grep ':83 ' | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2)
+if port_up 83 && [ -n "$BK_PID" ]; then
+  JAR_T=$(stat -c %Y "$JAR" 2>/dev/null || echo 0)
+  PROC_T=$(stat -c %Y "/proc/$BK_PID" 2>/dev/null || echo 0)
+  if [ "$JAR_T" -gt "$PROC_T" ]; then
+    echo "  jar 比进程新，重启后端（旧进程 PID=$BK_PID）"
+    kill "$BK_PID" 2>/dev/null
+    sleep 3
+  fi
+fi
 if port_up 83; then
-  ok "已在运行"
+  ok "已在运行（jar 与进程一致）"
 else
   if [ -f "$JAR" ]; then
     cd "$APP_DIR/backend/yiyao" || exit 1
