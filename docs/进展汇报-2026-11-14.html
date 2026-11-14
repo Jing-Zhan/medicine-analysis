@@ -68,6 +68,7 @@
 
   /* ---------- 截图位 ---------- */
   .shot{margin:16px 0 22px; border:1px dashed var(--line-strong); background:#fbfcfe;}
+  .shot.has-img{border-style:solid; border-color:var(--line);}
   .shot img{display:block; width:100%; height:auto;}
   .shot .slot{
     min-height:190px; display:flex; align-items:center; justify-content:center;
@@ -146,22 +147,19 @@
       </tbody>
     </table>
 
-    <figure class="shot">
-      <!-- <img src="images/01-home.png" alt="BI 系统首页"> -->
-      <div class="slot">截图位 01</div>
+    <figure class="shot has-img">
+      <img src="images/01-home.png" alt="BI 系统首页概览">
       <figcaption>图 1　BI 系统首页概览</figcaption>
     </figure>
 
-    <figure class="shot">
-      <!-- <img src="images/02-disease.png" alt="适应症分析"> -->
-      <div class="slot">截图位 02</div>
+    <figure class="shot has-img">
+      <img src="images/02-disease.png" alt="适应症分析">
       <figcaption>图 2　适应症分析</figcaption>
     </figure>
 
-    <figure class="shot">
-      <!-- <img src="images/03-drug.png" alt="药品分析"> -->
-      <div class="slot">截图位 03</div>
-      <figcaption>图 3　药品分析</figcaption>
+    <figure class="shot has-img">
+      <img src="images/03-drug.png" alt="药品分析">
+      <figcaption>图 3　药品分析，图表随关键词检索联动</figcaption>
     </figure>
   </section>
 
@@ -197,9 +195,8 @@
 
     <p>集群涉及六个组件且存在启动顺序依赖，手工启停容易产生残留进程与端口占用。为此将启停流程收敛为一条命令，脚本自行判断缺失组件并补齐，完成后执行一次全量自检。</p>
 
-    <figure class="shot">
-      <!-- <img src="images/04-check.png" alt="集群与服务自检"> -->
-      <div class="slot">截图位 04</div>
+    <figure class="shot has-img">
+      <img src="images/04-check.png" alt="集群与十三项接口自检">
       <figcaption>图 4　集群与十三项接口自检输出</figcaption>
     </figure>
   </section>
@@ -243,29 +240,28 @@
         <tr><td class="nowrap">维度</td><td>8 个，全部取自事实表：年龄、性别、年月、数据类型、支付方式、医生职称、科室、医院</td></tr>
         <tr><td class="nowrap">度量</td><td>2 个，处方金额求和、处方单价求和</td></tr>
         <tr><td class="nowrap">维度组合</td><td>256 个 cuboid</td></tr>
-        <tr><td class="nowrap">构建耗时</td><td>约 25 分钟</td></tr>
-        <tr><td class="nowrap">输入数据</td><td>100 万行，源数据 55 MB</td></tr>
+        <tr><td class="nowrap">构建耗时</td><td>23.13 分钟</td></tr>
+        <tr><td class="nowrap">输入数据</td><td>100 万行，中间表 60.95 MB</td></tr>
         <tr><td class="nowrap">立方体体积</td><td>2.95 GB，为源数据的 54 倍</td></tr>
         <tr><td class="nowrap">状态</td><td>READY</td></tr>
       </tbody>
     </table>
 
-    <figure class="shot">
-      <!-- <img src="images/05-kylin.png" alt="Kylin 立方体状态"> -->
-      <div class="slot">截图位 05</div>
-      <figcaption>图 5　Kylin 立方体状态与数据源</figcaption>
+    <figure class="shot has-img">
+      <img src="images/05-kylin-build.png" alt="立方体全量构建作业监控">
+      <figcaption>图 5　立方体全量构建作业监控，耗时 23.13 分钟</figcaption>
     </figure>
 
     <h3>查询路径的分工依据</h3>
     <p>13 个接口的查询需要在药品编码与诊断编码上建立关联。药品编码共 232,574 条，诊断编码共 42,501 条，二者属于高基数字段。立方体的 8 个维度不含这两列，原因在于维度数量与 cuboid 数量呈指数关系。</p>
-    <p>将 13 个接口实际用到的 20 个字段全部纳入模型，维度组合数量为 2 的 20 次方以上。以 2 的 8 次方耗时 25 分钟为基准外推，2 的 22 次方约 419 万个 cuboid，构建时间约 291 天。这一量级不具备可行性，与机器性能无关。</p>
+    <p>将 13 个接口实际用到的 20 个字段全部纳入模型，维度组合数量为 2 的 20 次方以上。以 2 的 8 次方耗时 23.13 分钟为基准外推，2 的 22 次方约 419 万个 cuboid，构建时间约 291 天。这一量级不具备可行性，与机器性能无关。</p>
     <p>据此确定分工：低基数的单表聚合由 Kylin 承担，高基数的明细关联由 MySQL 承担。MySQL 侧建立了 9 个索引，其中药品编码通过生成列去除序号后缀后建立索引，使关联能够命中索引。接口层通过配置项切换查询引擎，业务代码保持不变。</p>
   </section>
 
   <!-- ============ 五 ============ -->
   <section>
     <h2>五、运行结果</h2>
-    <p>13 个接口全部返回数据库中真实数据。耗时按查询类型呈现明显分层，单表聚合与多表关联分别处于两个区间。</p>
+    <p>13 个接口全部返回数据库中真实数据。耗时按查询类型呈现明显分层，单表聚合与多表关联分别处于两个区间。下表为一次完整运行的实测值，重复运行存在秒级波动。</p>
 
     <table>
       <caption>接口实测耗时，单位秒</caption>
@@ -291,9 +287,8 @@
 
     <div class="note">单表聚合接口耗时 0.61 至 2.16 秒，多表关联接口耗时 5.18 至 15.74 秒。后者需要在 100 万行事实表上逐行探测维表索引，耗时量级由数据规模决定。</div>
 
-    <figure class="shot">
-      <!-- <img src="images/06-citylevel.png" alt="城市等级竞争图"> -->
-      <div class="slot">截图位 06</div>
+    <figure class="shot has-img">
+      <img src="images/06-citylevel.png" alt="城市等级竞争图">
       <figcaption>图 6　城市等级竞争图，按销售金额降序排列</figcaption>
     </figure>
   </section>
@@ -312,7 +307,7 @@
         <tr><td class="nowrap">处方总数</td><td class="nowrap">1,000,000</td><td>全表计数，不含关联</td></tr>
         <tr><td class="nowrap">分布图合计</td><td class="nowrap">998,836</td><td>1,164 行的医院编号在区域维表中缺少对应记录，被内连接过滤</td></tr>
         <tr><td class="nowrap">销售总额</td><td class="nowrap">26,239,620.54 元</td><td>全表金额求和</td></tr>
-        <tr><td class="nowrap">分级金额合计</td><td class="nowrap">26,207,934 元</td><td>与销售总额相差 31,686.54 元，来自同一批缺失记录</td></tr>
+        <tr><td class="nowrap">分级金额合计</td><td class="nowrap">26,207,933.86 元</td><td>与销售总额相差 31,686.68 元，来自同一批缺失记录</td></tr>
         <tr><td class="nowrap">时间覆盖</td><td class="nowrap">单一月份 200812</td><td>时间维度只有一个取值，分级图呈现为等级之间的对比</td></tr>
         <tr><td class="nowrap">年龄分布</td><td class="nowrap">40 至 89 岁</td><td>共 50 个取值，每个取值 2 万行</td></tr>
         <tr><td class="nowrap">性别比例</td><td class="nowrap">500,222 比 499,778</td><td>两个取值接近均分，各年龄段差异在 0.04 个百分点量级</td></tr>
@@ -320,10 +315,9 @@
       </tbody>
     </table>
 
-    <figure class="shot">
-      <!-- <img src="images/07-screen.png" alt="可视化大屏"> -->
-      <div class="slot">截图位 07</div>
-      <figcaption>图 7　可视化大屏</figcaption>
+    <figure class="shot has-img">
+      <img src="images/07-dashboard.png" alt="可视化大屏">
+      <figcaption>图 7　可视化大屏，五个子图</figcaption>
     </figure>
   </section>
 
@@ -404,7 +398,7 @@
   <section>
     <h2>十、后续工作</h2>
     <ul class="plain">
-      <li>立方体改为按日期分区增量构建，避免每次全量重建的 25 分钟开销。</li>
+      <li>立方体改为按日期分区增量构建，避免每次全量重建的 23 分钟开销。</li>
       <li>对维度做分层与子立方体剪枝，在可控的 cuboid 数量下扩展立方体覆盖的维度。</li>
       <li>为耗时较长的若干多表关联查询建立预聚合中间表，将耗时压缩到 1 秒量级。</li>
       <li>补充登录鉴权与角色权限，并对高频查询结果增加缓存。</li>
