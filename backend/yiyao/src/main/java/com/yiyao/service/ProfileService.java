@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -303,6 +307,63 @@ public class ProfileService {
 		}
 		tag.setValue(round2(yes * 100.0 / total) + "%");
 		return tag;
+	}
+
+	// ---------------------------------------------------------------- 构成分析
+
+	/**
+	 * 药品属性构成允许的列名白名单，防止把外部参数直接拼进 SQL
+	 */
+	private static final Set<String> DRUG_ATTR_COLS = new HashSet<>(Arrays.asList(
+			"form_name1", "form_name2", "is_essential_drug", "is_otc",
+			"is_special_drug", "risk_pregnancy_grade", "is_national_formulary"));
+
+	/**
+	 * 疾病分层构成。level 取 11 大类、12 中类、13 细目。
+	 */
+	public List<Map<String, Object>> diseaseComposition(int level, int limit) {
+		int n = limit <= 0 ? 15 : Math.min(limit, 30);
+		List<Map<String, Object>> rows;
+		if (level == 12) {
+			rows = mapper.categoryLevel12(n);
+		} else if (level == 13) {
+			rows = mapper.categoryLevel13(n);
+		} else {
+			rows = mapper.categoryLevel11(n);
+		}
+		return withRatio(rows);
+	}
+
+	/**
+	 * 药品属性构成。type 为维表列名，须在白名单内。
+	 */
+	public List<Map<String, Object>> drugComposition(String type, int limit) {
+		String col = isEmpty(type) ? "form_name1" : type.trim();
+		if (!DRUG_ATTR_COLS.contains(col)) {
+			throw new IllegalArgumentException("不支持的属性类型：" + col);
+		}
+		int n = limit <= 0 ? 15 : Math.min(limit, 30);
+		return withRatio(mapper.drugAttribute(col, n));
+	}
+
+	/**
+	 * 补上占全库处方数的比例，字段名与其余接口保持一致
+	 */
+	private List<Map<String, Object>> withRatio(List<Map<String, Object>> rows) {
+		List<Map<String, Object>> out = new ArrayList<>();
+		if (rows == null) {
+			return out;
+		}
+		long grand = mapper.grandTotal();
+		for (Map<String, Object> row : rows) {
+			long cnt = toLong(row.get("cnt"));
+			Map<String, Object> item = new LinkedHashMap<>();
+			item.put("name", str(row.get("name")));
+			item.put("counter", cnt);
+			item.put("ratio", grand > 0 ? round2(cnt * 100.0 / grand) : 0D);
+			out.add(item);
+		}
+		return out;
 	}
 
 	// ---------------------------------------------------------------- 工具

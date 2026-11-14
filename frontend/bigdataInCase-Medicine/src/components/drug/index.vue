@@ -41,7 +41,7 @@ export default {
         this.$refs.disease.getSeries();
         this.$refs.cities.getSeries();
         this.$refs.hospital.getSeries();
-        this.$refs.profile.getProfile(this.keyword);
+        this.$refs.profile.load();
       }
   }
 }

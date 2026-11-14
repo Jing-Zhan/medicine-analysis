@@ -93,6 +93,25 @@ public class DrugController {
 	}
 
 	/**
+	 * 药品属性构成。
+	 *
+	 * @param type  form_name1 剂型、is_essential_drug 基本药物、is_otc 非处方药、
+	 *              is_special_drug 特殊管理、risk_pregnancy_grade 妊娠风险
+	 * @param limit 返回条数，上限 30
+	 */
+	@GetMapping("/attribute")
+	public WebResult<List<Map<String, Object>>> drugAttribute(
+			@RequestParam(defaultValue = "form_name1") String type,
+			@RequestParam(defaultValue = "15") int limit) {
+		try {
+			return new WebResult<>(profileService.drugComposition(type, limit));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
 	 * 药品画像。
 	 *
 	 * 与上面四个接口的区别：那些接口输出描述性统计，这里输出该药品的适应症谱，

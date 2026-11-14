@@ -42,7 +42,7 @@ export default {
         this.$refs.union.getSeries();
         this.$refs.age.getSeries();
         this.$refs.department.getSeries();
-        this.$refs.profile.getProfile(this.keyword);
+        this.$refs.profile.load();
       }
     }
 }

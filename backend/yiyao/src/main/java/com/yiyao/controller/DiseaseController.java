@@ -79,6 +79,24 @@ public class DiseaseController {
 	}
 
 	/**
+	 * 疾病分层构成。
+	 *
+	 * @param level 11 大类、12 中类、13 细目
+	 * @param limit 返回条数，上限 30
+	 */
+	@GetMapping("/category")
+	public WebResult<List<Map<String, Object>>> diseaseCategory(
+			@RequestParam(defaultValue = "11") int level,
+			@RequestParam(defaultValue = "15") int limit) {
+		try {
+			return new WebResult<>(profileService.diseaseComposition(level, limit));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
 	 * 目标适应症画像。
 	 *
 	 * 与上面四个接口的区别：那些接口输出描述性统计，这里输出关联强度，

@@ -150,4 +150,34 @@ public interface ProfileMapper {
 			+ "COALESCE(NULLIF(disease_type_name12, ''), '未分类') AS sub "
 			+ "FROM t_view_disease WHERE disease_type13 = #{code} LIMIT 1")
 	Map<String, Object> diseaseHierarchy(@Param("code") String code);
+
+	// ---------------------------------------------------------------- 构成分析
+
+	/**
+	 * 疾病分层构成：level 取 11 大类、12 中类、13 细目。
+	 * 走 agg_disease_total 四万行，再关联四万行的疾病维表，避免直接连一百万行事实表。
+	 */
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name11, ''), '未分类') AS name, SUM(a.cnt) AS cnt "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY cnt DESC LIMIT #{limit}")
+	List<Map<String, Object>> categoryLevel11(@Param("limit") int limit);
+
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name12, ''), '未分类') AS name, SUM(a.cnt) AS cnt "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY cnt DESC LIMIT #{limit}")
+	List<Map<String, Object>> categoryLevel12(@Param("limit") int limit);
+
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name13, ''), '未分类') AS name, SUM(a.cnt) AS cnt "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY cnt DESC LIMIT #{limit}")
+	List<Map<String, Object>> categoryLevel13(@Param("limit") int limit);
+
+	/**
+	 * 药品属性构成：col 必须是白名单内的列名，由 Service 校验后再传入。
+	 * 走 agg_drug_total 二十万行，再关联药品维表。
+	 */
+	@Select("SELECT COALESCE(NULLIF(g.${col}, ''), '未标注') AS name, SUM(a.cnt) AS cnt "
+			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug "
+			+ "GROUP BY 1 ORDER BY cnt DESC LIMIT #{limit}")
+	List<Map<String, Object>> drugAttribute(@Param("col") String col, @Param("limit") int limit);
 }
