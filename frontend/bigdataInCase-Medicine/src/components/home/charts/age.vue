@@ -1,7 +1,7 @@
 <template>
     <div class="age chart">
                     <div class="case-title">不同年龄患病比例分析</div>
-                    <echart class="case-chart" :options="option"/>
+                    <echart theme="med" class="case-chart" :options="option"/>
                 </div>
 </template>
 <script>
@@ -16,7 +16,7 @@ export default {
   data() {
     return {
       option:{
-            color:['#7bb6ef','#f7a25a'],
+            color:['#3E8EDC','#CF8A2C'],
             grid:{
                 top:20,
                 bottom:20,
@@ -34,12 +34,12 @@ export default {
                     axisLine: {
                         show: true,
                         lineStyle : {
-                            color : '#b8cde3'
+                            color : '#6E7B87'
                         } 
                     },
                     axisLabel:{
                         show : true,
-                        color:'#b8cde3'
+                        color:'#6E7B87'
                     },
                 }
             ],

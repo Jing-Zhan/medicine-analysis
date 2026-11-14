@@ -1,7 +1,7 @@
 <template>
    <div class="drug-top chart">
         <div class="case-title">Top10药品销额情况图表</div>
-        <!-- <echart class="case-chart" :options="option"/> -->
+        <!-- <echart theme="med" class="case-chart" :options="option"/> -->
         <div class="case-chart" id="drugTop"></div>
     </div>
 </template>

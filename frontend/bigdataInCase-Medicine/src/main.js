@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import echarts from 'echarts/lib/echarts'
 import App from './app'
 import router from './router'
 import './extends/index'
@@ -6,6 +7,11 @@ import config from '@/config'
 import http from 'vue-http-rexsheng'
 import { installMockAdapter } from '@/api'
 import './assets/css/css.css'
+import './assets/css/theme.css'
+import medTheme from './echarts-theme'
+
+// 图表统一登记一份主题，坐标轴、网格、图例与提示框在各页面保持一致
+echarts.registerTheme('med', medTheme)
 
 Vue.use(http)
 

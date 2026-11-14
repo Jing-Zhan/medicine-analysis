@@ -48,41 +48,57 @@ export default {
 .overview-list{
     display: flex;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 14px;
+    background: #fbfcfc;
+    border: 1px solid #eef2f4;
+    border-radius: 12px;
+    padding: 6px 4px;
 }
 .overview-item{
     flex: 1;
-    min-width: 160px;
-    padding: 8px 12px;
-    border-right: #ebedf6 1px solid;
-    text-align: center;
+    min-width: 170px;
+    padding: 12px 18px;
+    text-align: left;
+    position: relative;
 }
-.overview-item:last-child{
-    border-right: none;
+.overview-item + .overview-item:before{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 1px;
+    background: #e6ecef;
 }
 .overview-value{
     font-size: 30px;
-    line-height: 42px;
-    color: #1988f9;
-    font-weight: bold;
+    line-height: 40px;
+    color: #1f6f5c;
+    font-weight: 700;
+    letter-spacing: .5px;
+    font-variant-numeric: tabular-nums;
 }
 .overview-unit{
-    font-size: 14px;
-    font-weight: normal;
-    color: #697f94;
-    margin-left: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #74838e;
+    margin-left: 4px;
 }
 .overview-label{
-    font-size: 14px;
-    color: #697f94;
+    font-size: 13px;
+    color: #74838e;
+    letter-spacing: .2px;
 }
 @media (max-width: 1400px) {
     .overview-value{
-        font-size: 22px;
+        font-size: 24px;
         line-height: 32px;
     }
     .overview-label{
         font-size: 12px;
+    }
+    .overview-item{
+        padding: 8px 14px;
     }
 }
 </style>

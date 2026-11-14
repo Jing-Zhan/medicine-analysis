@@ -1,7 +1,7 @@
 <template>
     <div class="main-foot chart">
             <div class="case-title">各省份增长格局图表</div>
-            <echart class="case-chart" :options="option"/>
+            <echart theme="med" class="case-chart" :options="option"/>
         </div>
 </template>
 <script>
@@ -40,12 +40,12 @@ export default {
                     axisLine: {
                         show: true,
                         lineStyle : {
-                            color : '#b8cde3'
+                            color : '#6E7B87'
                         } 
                     },
                     axisLabel:{
                         show : true,
-                        color:'#b8cde3',
+                        color:'#6E7B87',
                         interval:0,
                         rotate:30,
                         formatter:function(value){
@@ -69,7 +69,7 @@ export default {
                 },
                 axisLabel:{
                     show : true,
-                    color:'#b8cde3'
+                    color:'#6E7B87'
                 }
             },{
                 type:'value',
@@ -83,7 +83,7 @@ export default {
                     },
                     axisLabel:{
                         show : true,
-                        color:'#bac8d5'
+                        color:'#6E7B87'
                         //formatter:'{value}%'
                     },
             }],
@@ -95,7 +95,7 @@ export default {
                     itemStyle:{
                         barBorderRadius:4,
                         borderColor:'#fff',
-                        color:'#5ab2ef'
+                        color:'#2E7DD1'
                     },
                     data: [320, 302, 301, 334, 390]
                 },

@@ -1,7 +1,7 @@
 <template>
     <div class="main-left chart">
         <div class="case-title">城市等级竞争图表</div>
-        <echart class="case-chart" :options="option"/>
+        <echart theme="med" class="case-chart" :options="option"/>
     </div>
 </template>
 <script>
@@ -16,7 +16,7 @@ export default {
   data() {
     return {
         option:{
-            color:['#b5a2de','#b5a2de','#5ab2ef','#5ab2ef','#de7984','#de7984','#5fccc3','#5fccc3','#f7a25a','#f7a25a'],
+            color:['#6B7FD7','#6B7FD7','#2E7DD1','#2E7DD1','#D9695F','#D9695F','#2FA98C','#2FA98C','#CF8A2C','#CF8A2C'],
             grid:{
                 top:30,
                 bottom:20,
@@ -29,7 +29,7 @@ export default {
                 axisPointer: {
                     type: 'cross',
                     label: {
-                        backgroundColor: '#283b56'
+                        backgroundColor: '#16232E'
                     }
                 }
             },
@@ -45,12 +45,12 @@ export default {
                     axisLine: {
                         show: true,
                         lineStyle : {
-                            color : '#b8cde3'
+                            color : '#6E7B87'
                         } 
                     },
                     axisLabel:{
                         show : true,
-                        color:'#b8cde3'
+                        color:'#6E7B87'
                     },
             }],
             yAxis: [{
@@ -64,7 +64,7 @@ export default {
                 },
                 axisLabel:{
                     show : true,
-                    color:'#b8cde3'
+                    color:'#6E7B87'
                 }
             },{
                 type:'value',
@@ -76,7 +76,7 @@ export default {
                     },
                     axisLabel:{
                         show : true,
-                        color:'#bac8d5',
+                        color:'#6E7B87',
                         formatter:'{value}%'
                     },
             }],
@@ -122,7 +122,7 @@ export default {
                             label: {
                                 show: true,
                                 position: 'top',
-                                color: '#b8cde3',
+                                color: '#6E7B87',
                                 fontSize: 11,
                                 // 金额较大，统一折算成万元显示
                                 formatter: function (p) { return (p.value / 10000).toFixed(1) + ' 万'; }

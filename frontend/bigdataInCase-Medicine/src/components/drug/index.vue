@@ -1,19 +1,30 @@
 <template>
-    <div class="main">
-      <div class="case-seach">
-            <input type="text" v-model="keyword" placeholder="请输入药品名称">
-            <a href="javascript:;" @click="seach"><img src="../../assets/img/seach.png" alt=""></a>
-          </div>
-        <div class="main-top clearfix">
-            <cities ref='cities' :keyword="keyword"></cities>
-            <disease ref='disease' :keyword="keyword"></disease>
+    <div class="page">
+        <div class="page-head">
+            <div class="page-head-main">
+                <h1 class="page-title">药品分析</h1>
+                <p class="page-sub">按药品查看覆盖城市与医院、对应适应症、科室分布，以及科室用药结构对比</p>
+            </div>
+            <div class="page-head-side">
+                <div class="case-seach">
+                    <input type="text" v-model="keyword" placeholder="请输入药品名称，例如 阿司匹林">
+                    <a href="javascript:;" @click="seach"><img src="../../assets/img/seach.png" alt=""></a>
+                </div>
+            </div>
         </div>
-        <div class="main-down clearfix">
-            <hospital ref='hospital' :keyword="keyword"></hospital>
-            <department ref='department' :keyword="keyword"></department>
+
+        <div class="main">
+            <div class="main-top clearfix">
+                <cities ref='cities' :keyword="keyword"></cities>
+                <disease ref='disease' :keyword="keyword"></disease>
+            </div>
+            <div class="main-down clearfix">
+                <hospital ref='hospital' :keyword="keyword"></hospital>
+                <department ref='department' :keyword="keyword"></department>
+            </div>
+            <profile ref='profile' mode="drug"></profile>
         </div>
-        <profile ref='profile' mode="drug"></profile>
-    </div>  
+    </div>
 </template>
 <script>
 import Vue from 'vue'
@@ -29,13 +40,13 @@ export default {
     profile:profile
   },
   data() {
-    return {        
+    return {
       keyword:undefined,
     }
   },
   mounted: function() {
     },
-  methods: {      
+  methods: {
     seach:function(){
         this.$refs.department.getSeries();
         this.$refs.disease.getSeries();

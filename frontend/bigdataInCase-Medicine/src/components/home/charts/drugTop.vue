@@ -1,7 +1,7 @@
 <template>
   <div class="drug-top chart">
     <div class="case-title">Top10药品销额情况图表</div>
-    <echart class="case-chart" :options="option" />
+    <echart theme="med" class="case-chart" :options="option" />
   </div>
 </template>
 <script>
@@ -24,16 +24,16 @@ export default {
         [56, 62, 17, "F"],
       ],
       colorList: [
-        "#7bb6ef",
-        "#42414a",
-        "#94ef7b",
-        "#f7a25a",
-        "#8486ef",
-        "#f75d84",
-        "#e7d352",
-        "#29928c",
-        "#f7595a",
-        "#94ebe7",
+        "#1F6F5C",
+        "#267A62",
+        "#2D8568",
+        "#34906E",
+        "#3B9B74",
+        "#42A67A",
+        "#49B180",
+        "#50BC86",
+        "#57C78C",
+        "#5ED292",
       ],
       option: {
         grid: {

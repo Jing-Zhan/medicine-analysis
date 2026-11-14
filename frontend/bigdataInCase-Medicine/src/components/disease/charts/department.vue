@@ -1,7 +1,7 @@
 <template>
     <div class="section chart">
         <div class="case-title">目标适应症对应科室分布</div>
-        <echart ref="case" class="case-chart" :options="option"/>
+        <echart theme="med" ref="case" class="case-chart" :options="option"/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
@@ -24,7 +24,7 @@ export default {
     return {
         nodata:false,
         option:{
-            color:['#6ecbbc','#7bb6ef','#f7a25a','#b5a2de','#de7984','#5fccc3','#e7d352'],
+            color:['#6ecbbc','#3E8EDC','#CF8A2C','#6B7FD7','#D9695F','#2FA98C','#e7d352'],
             tooltip: {
                 trigger: 'item',
                 formatter: '{b}：{c} ({d}%)'
@@ -34,7 +34,7 @@ export default {
                 right: 10,
                 top: 'middle',
                 textStyle:{
-                    color:'#364554'
+                    color:'#16232E'
                 }
             },
             series: [{
@@ -45,7 +45,7 @@ export default {
                 label: {
                     normal: {
                         formatter: '{b}\n{d}%',
-                        color:'#364554'
+                        color:'#16232E'
                     }
                 },
                 data: []

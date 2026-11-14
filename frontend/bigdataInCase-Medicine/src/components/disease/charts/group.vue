@@ -1,7 +1,7 @@
 <template>
     <div class="group chart">
         <div class="case-title">目标适应症用药组合分析</div>
-        <echart ref="case" class="case-chart" :options="option"/>
+        <echart theme="med" ref="case" class="case-chart" :options="option"/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>

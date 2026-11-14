@@ -1,7 +1,7 @@
 <template>
     <div class="diseases chart">
         <div class="case-title">目标药品对应适应症</div>
-        <echart ref="case" class="case-chart" :options="option"/>
+        <echart theme="med" ref="case" class="case-chart" :options="option"/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
@@ -22,9 +22,9 @@ export default {
   data() {
     return {
         nodata:false,
-        colors:['#8c8ee7','#eb6889','#dccb5d','#318a84','#3283d4','#98e683','#eba265','#ae7146','#9ae4e0','#eb6465','83b5e6','#424149'],
+        colors:['#6B7FD7','#D9695F','#C9A227','#2FA98C','#2E7DD1','#57B87F','#CF8A2C','#ae7146','#7FD3C7','#eb6465','83b5e6','#424149'],
         option:{
-            color:['#8c8ee7','#eb6889','#dccb5d','#318a84','#3283d4','#98e683','#eba265','#ae7146','#9ae4e0','#eb6465','83b5e6','#424149'],            
+            color:['#6B7FD7','#D9695F','#C9A227','#2FA98C','#2E7DD1','#57B87F','#CF8A2C','#ae7146','#7FD3C7','#eb6465','83b5e6','#424149'],            
             tooltip: {},
             series: {
                 type: 'sunburst',

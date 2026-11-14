@@ -1,17 +1,28 @@
 <template>
+    <div class="page">
+        <div class="page-head">
+            <div class="page-head-main">
+                <h1 class="page-title">适应症分析</h1>
+                <p class="page-sub">按疾病查看关联药品、联合用药、年龄与科室分布，以及费用负担</p>
+            </div>
+            <div class="page-head-side">
+                <div class="case-seach">
+                    <input type="text" v-model="keyword" placeholder="请输入目标适应症，例如 腺癌">
+                    <a href="javascript:;" @click="seach"><img src="../../assets/img/seach.png" alt=""></a>
+                </div>
+            </div>
+        </div>
+
         <div class="main clearfix">
-          <div class="case-seach">
-            <input type="text" v-model="keyword" placeholder="请输入目标适应症">
-            <a href="javascript:;" @click="seach"><img src="../../assets/img/seach.png" alt=""></a>
-          </div>
             <div class="main-left">
                 <group ref='group' :keyword="keyword"></group>
                 <union ref='union' :keyword="keyword"></union>
                 <department ref='department' :keyword="keyword"></department>
-            </div>            
+            </div>
             <age ref='age' :keyword="keyword"></age>
             <profile ref='profile' mode="disease"></profile>
-        </div>   
+        </div>
+    </div>
 </template>
 <script>
 import Vue from 'vue'
@@ -34,7 +45,6 @@ export default {
     }
   },
     mounted: function() {
-      
     },
     methods: {
       seach:function(){

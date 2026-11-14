@@ -1,7 +1,7 @@
 <template>
     <div class="city chart">
         <div class="case-title">药品品牌覆盖城市图</div>
-        <echart ref="case" class="case-chart" :options="option" autoresize/>
+        <echart theme="med" ref="case" class="case-chart" :options="option" autoresize/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
@@ -23,7 +23,7 @@ export default {
     return {
         nodata:false,
         option:{
-            color:['#5ab2ef'],
+            color:['#2E7DD1'],
             grid:{
                 top:20,
                 bottom:70,
@@ -45,12 +45,12 @@ export default {
                 axisLine: {
                     show: true,
                     lineStyle : {
-                        color : '#c4d6e7'
+                        color : '#DFE6EB'
                     }
                 },
                 axisLabel:{
                     show: true,
-                    color:'#364554',
+                    color:'#16232E',
                     interval:0,
                     rotate:30,
                     formatter:function(value){
@@ -72,11 +72,11 @@ export default {
                 },
                 axisLabel:{
                     show: true,
-                    color:'#364554'
+                    color:'#16232E'
                 },
                 splitLine:{
                     lineStyle:{
-                        color:'#ebedf6'
+                        color:'#E5EBEF'
                     }
                 }
             },

@@ -1,5 +1,16 @@
 <template>
-    <div>
+    <div class="page">
+        <div class="page-head">
+            <div class="page-head-main">
+                <h1 class="page-title">首页概览</h1>
+                <p class="page-sub">整体用药规模与分布：城市等级、年龄结构、药品销额与省份格局</p>
+            </div>
+            <div class="page-head-side">
+                <span class="chip">数据范围 <b>200812</b></span>
+                <span class="chip">处方明细 <b>100 万行</b></span>
+            </div>
+        </div>
+
         <overview></overview>
         <div class="main clearfix">
             <citylevel></citylevel>
@@ -7,7 +18,7 @@
                 <age></age>
                 <drugtop></drugtop>
             </div>
-        </div>        
+        </div>
         <province></province>
     </div>
 </template>
@@ -27,7 +38,7 @@ export default {
     province:province
   },
   data() {
-    return {  
+    return {
     }
   }
 }

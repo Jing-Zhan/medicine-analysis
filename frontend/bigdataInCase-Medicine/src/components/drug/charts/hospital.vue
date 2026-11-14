@@ -1,7 +1,7 @@
 <template>
     <div class="hospital chart">
         <div class="case-title">药品品牌覆盖医院分析</div>
-        <echart ref="case" class="case-chart" :options="option"/>
+        <echart theme="med" ref="case" class="case-chart" :options="option"/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
@@ -23,7 +23,7 @@ export default {
     return {
         nodata:false,
         option:{
-            color:['#b5a2de','#5ab2ef','#de7984','#5fccc3'],
+            color:['#6B7FD7','#2E7DD1','#D9695F','#2FA98C'],
              tooltip : {
                 trigger: 'axis',
                 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
@@ -63,7 +63,7 @@ export default {
                 },
                 axisLabel:{
                     show : true,
-                    color:'#364554',
+                    color:'#16232E',
                     interval:0,
                     rotate:20,
                     formatter:function(value){

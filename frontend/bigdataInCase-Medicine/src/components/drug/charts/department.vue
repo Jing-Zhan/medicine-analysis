@@ -1,7 +1,7 @@
 <template>
     <div class="section chart">
         <div class="case-title">目标药品科室分布</div>
-        <echart ref="case" class="case-chart" :options="option"/>
+        <echart theme="med" ref="case" class="case-chart" :options="option"/>
         <div class="nodata" v-show="nodata">暂无数据</div>
     </div>
 </template>
@@ -23,7 +23,7 @@ export default {
     return {
         nodata:false,
         option:{
-            color:['#29c7ce','#b5a2de','#5ab2ef','#ffba84','#8c9ab5','#e7cf08'],
+            color:['#29c7ce','#6B7FD7','#2E7DD1','#ffba84','#8c9ab5','#e7cf08'],
             tooltip: {                
                 trigger: 'item',
                 formatter: "{a} <br/>{b} : {c}"
