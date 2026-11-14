@@ -1,0 +1,15 @@
+接口耗时采集 2026-11-14 17:14:12
+
+/home/overview         HTTP=200  耗时 0.609 秒
+/home/citylevel        HTTP=200  耗时 2.115 秒
+/home/age              HTTP=200  耗时 2.187 秒
+/home/top10            HTTP=200  耗时 5.843 秒
+/home/province         HTTP=200  耗时 1.988 秒
+/disease/union         HTTP=200  耗时 15.264 秒
+/disease/drug          HTTP=200  耗时 15.166 秒
+/disease/age           HTTP=200  耗时 7.202 秒
+/disease/section       HTTP=200  耗时 9.343 秒
+/drug/cities           HTTP=200  耗时 5.202 秒
+/drug/hospital         HTTP=200  耗时 7.673 秒
+/drug/diseases         HTTP=200  耗时 14.672 秒
+/drug/section          HTTP=200  耗时 12.977 秒

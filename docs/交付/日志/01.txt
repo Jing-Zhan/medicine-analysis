@@ -1,0 +1,46 @@
+
+[36m== 1/5 集群：ZooKeeper / HDFS / YARN / HBase / Hive metastore / Kylin ==[0m
+  [32m[ OK ][0m 6 个组件端口全部在监听，跳过启动
+  [32m[ OK ][0m ZooKeeper (2181)
+  [32m[ OK ][0m HDFS (9000)
+  [32m[ OK ][0m YARN (8088)
+  [32m[ OK ][0m HBase (16010)
+  [32m[ OK ][0m HiveMetastore (9083)
+  [32m[ OK ][0m Kylin (7070)
+
+[36m== 2/5 MySQL ==[0m
+  [32m[ OK ][0m MySQL 3306，处方表 1000000 行
+
+[36m== 3/5 后端接口（83） ==[0m
+  [32m[ OK ][0m 已在运行
+  [32m[ OK ][0m /home/overview 返回 200
+  [32m[ OK ][0m 前端页面 / 返回 200
+
+[36m== 4/5 Django 大屏（8000） ==[0m
+  [32m[ OK ][0m 已在运行
+  [32m[ OK ][0m 大屏取数正常（db: true）
+
+[36m== 5/5 13 个接口连通性（百万行聚合，逐个跑完约 1~2 分钟） ==[0m
+  [32m[ OK ][0m /home/overview       0.61 秒
+  [32m[ OK ][0m /home/citylevel      2.27 秒
+  [32m[ OK ][0m /home/age            2.21 秒
+  [32m[ OK ][0m /home/top10          5.98 秒
+  [32m[ OK ][0m /home/province       2.02 秒
+  [32m[ OK ][0m /disease/union      15.19 秒
+  [32m[ OK ][0m /disease/drug       16.05 秒
+  [32m[ OK ][0m /disease/age         7.51 秒
+  [32m[ OK ][0m /disease/section     9.31 秒
+  [32m[ OK ][0m /drug/cities         5.22 秒
+  [32m[ OK ][0m /drug/hospital       7.79 秒
+  [32m[ OK ][0m /drug/diseases      14.72 秒
+  [32m[ OK ][0m /drug/section       13.06 秒
+
+[32m全部就绪[0m
+  前端 + 接口： http://192.168.207.179:83/
+  可视化大屏： http://192.168.207.179:8000/
+  Kylin 控制台：http://192.168.207.179:7070/kylin   (ADMIN / KYLIN)
+  YARN：       http://192.168.207.179:8088/
+  HDFS：       http://192.168.207.179:50070/
+  HBase：      http://192.168.207.179:16010/
+
+日志：后端 /tmp/yiyao.log　大屏 /tmp/screen.log　集群 /tmp/start-cluster.log

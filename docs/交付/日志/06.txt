@@ -1,0 +1,9 @@
+业务表与聚合表行数
+
+prescription_diseases    1000000
+agg_disease_total        42501
+agg_drug_total           205971
+agg_disease_drug         999935
+agg_pres_drug            999999
+agg_section_drug         870702
+agg_cat_drug             997681
