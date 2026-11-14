@@ -102,9 +102,10 @@
                 var self = this
                 self.loading = true
                 self.error = ''
+                // 参数只能写在 url 上：vue-http-rexsheng 的 GET 请求不会把 data 拼进查询串，
+                // 只做 {占位符} 替换，传 data 等于丢弃，服务端会一律走默认值。
                 Vue.ajax.send({
-                    url: self.mode === 'drug' ? '/drug/structure' : '/disease/structure',
-                    data: {limit: 10},
+                    url: (self.mode === 'drug' ? '/drug/structure' : '/disease/structure') + '?limit=10',
                     success: function (res) {
                         self.loading = false
                         if (!!res && res.code == '200' && res.data) {
