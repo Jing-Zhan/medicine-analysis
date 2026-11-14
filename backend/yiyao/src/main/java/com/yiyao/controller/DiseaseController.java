@@ -2,9 +2,11 @@ package com.yiyao.controller;
 
 import com.yiyao.output.DiseaseDrugUnionOutput;
 import com.yiyao.output.ProfileOutput;
+import com.yiyao.output.StructureRow;
 import com.yiyao.output.WebResult;
 import com.yiyao.service.DiseaseService;
 import com.yiyao.service.ProfileService;
+import com.yiyao.service.StructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,9 @@ public class DiseaseController {
 
 	@Autowired
 	private ProfileService profileService;
+
+	@Autowired
+	private StructureService structureService;
 
 	/**
 	 * 页面请求目标适应症关联药品组合分析数据
@@ -108,6 +113,24 @@ public class DiseaseController {
 			@RequestParam(defaultValue = "15") int limit) {
 		try {
 			return new WebResult<>(profileService.diseaseComposition(level, limit));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
+	 * 疾病大类用药结构对比。
+	 *
+	 * 按处方数取前 N 个疾病大类，输出注射剂、基本药物、抗菌药物三个占比，
+	 * 用来观察不同适应症领域的用药结构差异。
+	 *
+	 * @param limit 返回条数，上限 30
+	 */
+	@GetMapping("/structure")
+	public WebResult<List<StructureRow>> diseaseStructure(@RequestParam(defaultValue = "10") int limit) {
+		try {
+			return new WebResult<>(structureService.categoryStructure(limit));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new WebResult(e);

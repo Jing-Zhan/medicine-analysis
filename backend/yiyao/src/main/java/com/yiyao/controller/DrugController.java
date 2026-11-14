@@ -1,9 +1,11 @@
 package com.yiyao.controller;
 
 import com.yiyao.output.ProfileOutput;
+import com.yiyao.output.StructureRow;
 import com.yiyao.output.WebResult;
 import com.yiyao.service.DrugService;
 import com.yiyao.service.ProfileService;
+import com.yiyao.service.StructureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,12 @@ public class DrugController {
 	 */
 	@Autowired
 	private ProfileService profileService;
+
+	/**
+	 * 用药结构对比接口
+	 */
+	@Autowired
+	private StructureService structureService;
 
 	/**
 	 * 药品品牌覆盖城市
@@ -118,6 +126,24 @@ public class DrugController {
 			@RequestParam(defaultValue = "15") int limit) {
 		try {
 			return new WebResult<>(profileService.drugComposition(type, limit));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
+	 * 科室用药结构对比。
+	 *
+	 * 按处方数取前 N 个科室，输出注射剂、基本药物、抗菌药物三个占比，
+	 * 用来观察不同科室的用药结构差异。
+	 *
+	 * @param limit 返回条数，上限 30
+	 */
+	@GetMapping("/structure")
+	public WebResult<List<StructureRow>> drugStructure(@RequestParam(defaultValue = "10") int limit) {
+		try {
+			return new WebResult<>(structureService.sectionStructure(limit));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new WebResult(e);

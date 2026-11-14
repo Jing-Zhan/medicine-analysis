@@ -2,74 +2,52 @@
     <div class="mod">
         <div class="mod-head">
             <span class="mod-title">{{ title }}</span>
-            <span class="mod-tabs" v-if="mode === 'disease'">
-                <a v-for="t in tabs"
-                   :key="t.key"
-                   href="javascript:;"
-                   :class="['mod-tab', t.key === active ? 'on' : '']"
-                   @click="switchTab(t.key)">{{ t.label }}</a>
-            </span>
             <span class="mod-note">{{ note }}</span>
         </div>
 
         <div v-if="loading" class="mod-empty">数据加载中</div>
         <div v-else-if="error" class="mod-empty">{{ error }}</div>
-        <div v-else-if="mode === 'drug'" class="mod-drug">
-            <div class="kpis">
-                <div class="kpi" v-for="k in indicators" :key="k.Label">
-                    <div class="kpi-val">{{ k.Value }}<em>%</em></div>
-                    <div class="kpi-lab">{{ k.Label }}</div>
-                </div>
-            </div>
-
-            <div class="market-head">
-                <span class="market-title">厂商销售份额前十</span>
-                <span class="market-meta">
-                    厂商总数 {{ fmt(vendorCount) }}　
-                    CR10 {{ cr10 }}%　
-                    HHI {{ fmt(hhi) }}
-                </span>
-            </div>
-            <div class="vendors">
-                <div class="vendor-row" v-for="(v, i) in vendors" :key="v.Name">
-                    <span class="vendor-rank">{{ i + 1 }}</span>
-                    <span class="vendor-name" :title="v.Name">{{ v.Name }}</span>
-                    <span class="vendor-track">
-                        <span class="vendor-fill" :style="{ width: barWidth(v.Share, 8) }"></span>
-                    </span>
-                    <span class="vendor-amount">{{ fmt(v.Amount) }}</span>
-                    <span class="vendor-share">{{ v.Share }}%</span>
-                </div>
-                <div class="mod-empty" v-if="!vendors.length">暂无厂商数据</div>
-            </div>
-        </div>
-
-        <div v-else class="mod-disease">
+        <div v-else>
             <table class="tbl">
                 <thead>
                 <tr>
                     <th class="c">#</th>
-                    <th>疾病分类</th>
+                    <th>{{ nameLabel }}</th>
                     <th class="r">处方数</th>
-                    <th class="r">总金额 元</th>
-                    <th class="r">均次费用 元</th>
-                    <th class="r">占比</th>
+                    <th class="r">注射剂占比</th>
+                    <th class="r">基本药物占比</th>
+                    <th class="r">抗菌药物占比</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(it, i) in burden" :key="it.Name">
+                <tr v-for="(it, i) in rows" :key="it.Name">
                     <td class="c">{{ i + 1 }}</td>
                     <td class="name" :title="it.Name">{{ it.Name }}</td>
                     <td class="r">{{ fmt(it.Records) }}</td>
-                    <td class="r">{{ fmt(it.Amount) }}</td>
-                    <td class="r strong">{{ fmt(it.AvgAmount) }}</td>
-                    <td class="r">{{ it.Share }}%</td>
+                    <td class="r">
+                        <span class="rate">{{ fix(it.InjRate) }}%</span>
+                        <span class="track"><span class="fill" :style="{ width: bar(it.InjRate) }"></span></span>
+                    </td>
+                    <td class="r">
+                        <span class="rate">{{ fix(it.EssRate) }}%</span>
+                        <span class="track"><span class="fill alt" :style="{ width: bar(it.EssRate) }"></span></span>
+                    </td>
+                    <td class="r">
+                        <span class="rate">{{ fix(it.AntiRate) }}%</span>
+                        <span class="track"><span class="fill warn" :style="{ width: bar(it.AntiRate) }"></span></span>
+                    </td>
                 </tr>
-                <tr v-if="!burden.length">
-                    <td colspan="6" class="c mod-empty">暂无数据</td>
+                <tr v-if="!rows.length">
+                    <td colspan="6" class="mod-empty">暂无数据</td>
                 </tr>
                 </tbody>
             </table>
+
+            <div class="mod-foot" v-if="rows.length">
+                <span>注射剂占比 {{ fix(range.min) }}% 至 {{ fix(range.max) }}%，</span>
+                <span>最高为 {{ range.maxName }}，最低为 {{ range.minName }}。</span>
+                <span>{{ nameLabel }}按处方数取前 {{ rows.length }} 位。</span>
+            </div>
         </div>
     </div>
 </template>
@@ -86,82 +64,51 @@
             }
         },
         data() {
-            const tabs = [
-                {key: 'cat', label: '大类', param: 11},
-                {key: 'sub', label: '中类', param: 12},
-                {key: 'item', label: '细目', param: 13}
-            ]
             return {
-                tabs: tabs,
-                active: 'cat',
                 loading: false,
                 error: '',
-                burden: [],
-                indicators: [],
-                vendors: [],
-                vendorCount: 0,
-                cr10: 0,
-                hhi: 0
+                rows: []
             }
         },
         computed: {
             title() {
-                return this.mode === 'drug' ? '用药结构与厂商份额' : '疾病费用负担'
+                return this.mode === 'drug' ? '各科室用药结构对比' : '各疾病大类用药结构对比'
+            },
+            nameLabel() {
+                return this.mode === 'drug' ? '科室' : '疾病大类'
             },
             note() {
-                return this.mode === 'drug'
-                    ? '占比按处方数加权，CR10 为前十厂商金额占比，HHI 越小越分散'
-                    : '均次费用为该类的总金额除以处方数，用于区分「人多」与「花钱多」'
+                return '占比按处方数加权，用于比较不同' + this.nameLabel + '的用药结构差异'
+            },
+            range() {
+                var list = this.rows.slice()
+                if (!list.length) return {min: 0, max: 0, minName: '', maxName: ''}
+                list.sort(function (a, b) {
+                    return Number(a.InjRate) - Number(b.InjRate)
+                })
+                return {
+                    min: list[0].InjRate,
+                    minName: list[0].Name,
+                    max: list[list.length - 1].InjRate,
+                    maxName: list[list.length - 1].Name
+                }
             }
         },
         mounted() {
             this.load()
         },
         methods: {
-            switchTab(key) {
-                if (key === this.active) return
-                this.active = key
-                this.load()
-            },
             load() {
                 var self = this
                 self.loading = true
                 self.error = ''
-                if (self.mode === 'drug') {
-                    Vue.ajax.send({
-                        url: '/drug/overview',
-                        data: {},
-                        success: function (res) {
-                            self.loading = false
-                            if (!!res && res.code == '200' && res.data) {
-                                var d = res.data
-                                self.indicators = d.Indicators || []
-                                self.vendors = d.Vendors || []
-                                self.vendorCount = d.VendorCount || 0
-                                self.cr10 = d.Cr10 || 0
-                                self.hhi = d.Hhi || 0
-                            } else {
-                                self.error = (res && res.msg) ? res.msg : '查询失败'
-                            }
-                        },
-                        error: function () {
-                            self.loading = false
-                            self.error = '接口请求失败'
-                        }
-                    })
-                    return
-                }
-                var level = 11
-                for (var i = 0; i < self.tabs.length; i++) {
-                    if (self.tabs[i].key === self.active) level = self.tabs[i].param
-                }
                 Vue.ajax.send({
-                    url: '/disease/burden',
-                    data: {level: level},
+                    url: self.mode === 'drug' ? '/drug/structure' : '/disease/structure',
+                    data: {limit: 10},
                     success: function (res) {
                         self.loading = false
                         if (!!res && res.code == '200' && res.data) {
-                            self.burden = res.data || []
+                            self.rows = res.data || []
                         } else {
                             self.error = (res && res.msg) ? res.msg : '查询失败'
                         }
@@ -178,12 +125,16 @@
                 if (isNaN(n)) return String(v)
                 return n.toLocaleString('zh-CN')
             },
-            barWidth(share, full) {
-                var n = Number(share)
+            fix(v) {
+                var n = Number(v)
+                if (isNaN(n)) return '0.00'
+                return n.toFixed(2)
+            },
+            bar(v) {
+                var n = Number(v)
                 if (isNaN(n) || n <= 0) return '0%'
-                var w = n / full * 100
-                if (w > 100) w = 100
-                return (w < 2 ? 2 : w) + '%'
+                if (n > 100) n = 100
+                return (n < 2 ? 2 : n) + '%'
             }
         }
     }
@@ -216,27 +167,6 @@
         white-space: nowrap;
     }
 
-    .mod-tabs {
-        flex: 1;
-    }
-
-    .mod-tab {
-        display: inline-block;
-        padding: 3px 12px;
-        margin-right: 6px;
-        font-size: 13px;
-        color: #4a5b6d;
-        border: 1px solid #d7e0ea;
-        background: #f7fafc;
-        text-decoration: none;
-    }
-
-    .mod-tab.on {
-        color: #fff;
-        background: #1f5fa8;
-        border-color: #1f5fa8;
-    }
-
     .mod-note {
         font-size: 12px;
         color: #8496a8;
@@ -249,110 +179,13 @@
         font-size: 13px;
     }
 
-    /* ---------- 指标卡 ---------- */
-    .kpis {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 16px;
+    .mod-foot {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #5a6b7d;
+        line-height: 22px;
     }
 
-    .kpi {
-        flex: 1 1 0;
-        border: 1px solid #e8eef5;
-        border-top: 3px solid #1f5fa8;
-        background: #f6fafd;
-        padding: 12px 14px;
-    }
-
-    .kpi-val {
-        font-size: 22px;
-        font-weight: 600;
-        color: #1f5fa8;
-        line-height: 1.2;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .kpi-val em {
-        font-style: normal;
-        font-size: 13px;
-        margin-left: 2px;
-    }
-
-    .kpi-lab {
-        font-size: 12.5px;
-        color: #6b7c8f;
-        margin-top: 4px;
-    }
-
-    /* ---------- 厂商 ---------- */
-    .market-head {
-        display: flex;
-        align-items: baseline;
-        margin-bottom: 8px;
-    }
-
-    .market-title {
-        font-size: 13px;
-        color: #1f5fa8;
-        margin-right: 14px;
-    }
-
-    .market-meta {
-        font-size: 12.5px;
-        color: #6b7c8f;
-    }
-
-    .vendor-row {
-        display: flex;
-        align-items: center;
-        font-size: 13px;
-        padding: 4px 0;
-    }
-
-    .vendor-rank {
-        flex: 0 0 24px;
-        color: #8496a8;
-        text-align: center;
-    }
-
-    .vendor-name {
-        flex: 0 0 260px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #33414f;
-        padding-right: 12px;
-    }
-
-    .vendor-track {
-        flex: 1 1 auto;
-        height: 10px;
-        background: #eef2f7;
-        margin-right: 12px;
-    }
-
-    .vendor-fill {
-        display: block;
-        height: 10px;
-        background: #5b9bd5;
-    }
-
-    .vendor-amount {
-        flex: 0 0 110px;
-        text-align: right;
-        color: #33414f;
-        font-variant-numeric: tabular-nums;
-        padding-right: 14px;
-    }
-
-    .vendor-share {
-        flex: 0 0 64px;
-        text-align: right;
-        color: #6b7c8f;
-        font-variant-numeric: tabular-nums;
-    }
-
-    /* ---------- 费用表 ---------- */
     .tbl {
         width: 100%;
         border-collapse: collapse;
@@ -360,60 +193,67 @@
     }
 
     .tbl th {
-        text-align: left;
+        background: #f4f7fb;
+        color: #4a5b6d;
         font-weight: 600;
-        color: #6b7c8f;
+        text-align: left;
+        padding: 8px 10px;
         border-bottom: 1px solid #e2e8f0;
-        padding: 7px 8px;
         white-space: nowrap;
     }
 
     .tbl td {
-        padding: 7px 8px;
-        border-bottom: 1px solid #f1f5f9;
-        color: #33414f;
-    }
-
-    .tbl tbody tr:hover {
-        background: #f7fafd;
-    }
-
-    .tbl .r {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
+        padding: 7px 10px;
+        border-bottom: 1px solid #eef2f7;
+        color: #33404d;
     }
 
     .tbl .c {
         text-align: center;
+        width: 44px;
+    }
+
+    .tbl .r {
+        text-align: right;
+        white-space: nowrap;
     }
 
     .tbl .name {
-        max-width: 420px;
+        max-width: 260px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .tbl .strong {
-        color: #1f5fa8;
-        font-weight: 600;
+    .tbl tbody tr:hover td {
+        background: #f7fbff;
     }
 
-    @media (max-width: 1200px) {
-        .mod-note {
-            display: none;
-        }
+    .rate {
+        display: inline-block;
+        min-width: 52px;
+    }
 
-        .vendor-name {
-            flex: 0 0 180px;
-        }
+    .track {
+        display: inline-block;
+        width: 70px;
+        height: 6px;
+        background: #edf1f6;
+        vertical-align: middle;
+        margin-left: 6px;
+    }
 
-        .kpis {
-            flex-wrap: wrap;
-        }
+    .fill {
+        display: block;
+        height: 6px;
+        background: #2f7fd1;
+    }
 
-        .kpi {
-            flex: 1 1 30%;
-        }
+    .fill.alt {
+        background: #35a97b;
+    }
+
+    .fill.warn {
+        background: #e08c2f;
     }
 </style>

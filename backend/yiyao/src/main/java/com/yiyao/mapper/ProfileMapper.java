@@ -207,11 +207,15 @@ public interface ProfileMapper {
 
 	/**
 	 * 全部厂商的销售金额，用于计算份额、CR10 与 HHI。
-	 * 七千多行，一次取回在 Java 里算，避免在 SQL 里做多次聚合。
+	 *
+	 * company_name 列在导入时有错位，少量记录存的是剂型值，例如「口服」「注射」，
+	 * 不处理会让这些值排到厂商榜前两位。这里要求名称包含企业特征词才计入，
+	 * 过滤后仍是七千多家，一次取回在 Java 里算，避免在 SQL 里做多次聚合。
 	 */
 	@Select("SELECT COALESCE(NULLIF(g.company_name, ''), '未标注') AS name, "
 			+ "ROUND(SUM(a.amount), 2) AS amount "
 			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug "
+			+ "WHERE g.company_name REGEXP '公司|厂|集团|药业|制药|研究院|生物|医药|科技' "
 			+ "GROUP BY 1 ORDER BY amount DESC")
 	List<Map<String, Object>> vendorAmounts();
 
@@ -220,9 +224,9 @@ public interface ProfileMapper {
 	 */
 	@Select("SELECT "
 			+ "SUM(CASE WHEN g.form_name1 LIKE '%注射%' THEN a.cnt ELSE 0 END) AS inj, "
-			+ "SUM(CASE WHEN g.is_essential_drug = '是' THEN a.cnt ELSE 0 END) AS ess, "
-			+ "SUM(CASE WHEN g.is_otc = '是' THEN a.cnt ELSE 0 END) AS otc, "
-			+ "SUM(CASE WHEN g.is_special_drug = '是' THEN a.cnt ELSE 0 END) AS sp, "
+			+ "SUM(CASE WHEN g.is_essential_drug IN ('是','1','Y','YES','y') THEN a.cnt ELSE 0 END) AS ess, "
+			+ "SUM(CASE WHEN g.is_otc IN ('是','1','Y','YES','y') THEN a.cnt ELSE 0 END) AS otc, "
+			+ "SUM(CASE WHEN g.is_special_drug IN ('是','1','Y','YES','y') THEN a.cnt ELSE 0 END) AS sp, "
 			+ "SUM(CASE WHEN g.drug_generic_name REGEXP '霉素|西林|头孢|沙星|环素|培南|硝唑|磺胺|呋喃' "
 			+ "THEN a.cnt ELSE 0 END) AS anti, SUM(a.cnt) AS total "
 			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug")
