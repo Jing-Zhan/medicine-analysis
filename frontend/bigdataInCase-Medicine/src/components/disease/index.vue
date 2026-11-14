@@ -10,6 +10,7 @@
                 <department ref='department' :keyword="keyword"></department>
             </div>            
             <age ref='age' :keyword="keyword"></age>
+            <profile ref='profile' mode="disease"></profile>
         </div>   
 </template>
 <script>
@@ -18,12 +19,14 @@ import age from  '@/components/disease/charts/age'
 import department from  '@/components/disease/charts/department'
 import group from  '@/components/disease/charts/group'
 import union from  '@/components/disease/charts/union'
+import profile from  '@/components/common/profile'
 export default {
   components: {
     'age': age,
     department:department,
     union:union,
-    group:group
+    group:group,
+    profile:profile
   },
   data() {
     return {
@@ -39,6 +42,7 @@ export default {
         this.$refs.union.getSeries();
         this.$refs.age.getSeries();
         this.$refs.department.getSeries();
+        this.$refs.profile.getProfile(this.keyword);
       }
     }
 }

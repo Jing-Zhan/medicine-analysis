@@ -52,6 +52,14 @@ public class ProfileOutput {
 		 * 占全库处方数的比例，单位 %
 		 */
 		private double share;
+		/**
+		 * 所属疾病大类，仅疾病画像返回
+		 */
+		private String category;
+		/**
+		 * 所属疾病中类，仅疾病画像返回
+		 */
+		private String subCategory;
 	}
 
 	/**

@@ -12,6 +12,7 @@
             <hospital ref='hospital' :keyword="keyword"></hospital>
             <department ref='department' :keyword="keyword"></department>
         </div>
+        <profile ref='profile' mode="drug"></profile>
     </div>  
 </template>
 <script>
@@ -20,10 +21,12 @@ import department from  '@/components/drug/charts/department'
 import disease from  '@/components/drug/charts/disease'
 import cities from  '@/components/drug/charts/cities'
 import hospital from  '@/components/drug/charts/hospital'
+import profile from  '@/components/common/profile'
 export default {
   components: {
     'department': department,
-    disease,cities,hospital
+    disease,cities,hospital,
+    profile:profile
   },
   data() {
     return {        
@@ -38,6 +41,7 @@ export default {
         this.$refs.disease.getSeries();
         this.$refs.cities.getSeries();
         this.$refs.hospital.getSeries();
+        this.$refs.profile.getProfile(this.keyword);
       }
   }
 }

@@ -59,7 +59,13 @@ public class ProfileService {
 
 		ProfileOutput out = new ProfileOutput();
 		out.setMode("disease");
-		out.setTarget(toTarget(target, grand));
+		ProfileOutput.Target diseaseTarget = toTarget(target, grand);
+		Map<String, Object> hierarchy = mapper.diseaseHierarchy(targetCode);
+		if (hierarchy != null) {
+			diseaseTarget.setCategory(str(hierarchy.get("cat")));
+			diseaseTarget.setSubCategory(str(hierarchy.get("sub")));
+		}
+		out.setTarget(diseaseTarget);
 		out.setItemLabel("关联药品");
 
 		// 关联强度榜：对照对象的处方数放在 var_total
@@ -255,10 +261,15 @@ public class ProfileService {
 		ProfileOutput.Tag tag = new ProfileOutput.Tag();
 		tag.setLabel(label);
 		tag.setValue("未记录");
-		if (rows != null && !rows.isEmpty()) {
-			String v = str(rows.get(0).get("v")).trim();
-			if (!isEmpty(v) && !"-".equals(v) && !"\\N".equals(v)) {
+		if (rows == null) {
+			return tag;
+		}
+		// 该列存在导入错位，混入了企业名称等非枚举取值，此处只接受能归一为是或否的行
+		for (Map<String, Object> row : rows) {
+			String v = yesNo(row.get("v"));
+			if (v != null) {
 				tag.setValue(v);
+				return tag;
 			}
 		}
 		return tag;
@@ -267,6 +278,10 @@ public class ProfileService {
 	/**
 	 * 适应症维度：取占比最高的取值并附上比例，例如「是 82.3%」
 	 */
+	/**
+	 * 适应症维度：先按归一后的取值汇总，输出是类取值在该适应症处方中的占比。
+	 * 该列存在导入错位，混入过企业名称，不能直接取第一条。
+	 */
 	private ProfileOutput.Tag dominantTag(String label, List<Map<String, Object>> rows) {
 		ProfileOutput.Tag tag = new ProfileOutput.Tag();
 		tag.setLabel(label);
@@ -274,25 +289,41 @@ public class ProfileService {
 		if (rows == null || rows.isEmpty()) {
 			return tag;
 		}
+		long yes = 0L;
 		long total = 0L;
 		for (Map<String, Object> row : rows) {
-			total += toLong(row.get("c"));
+			long c = toLong(row.get("c"));
+			total += c;
+			if ("是".equals(yesNo(row.get("v")))) {
+				yes += c;
+			}
 		}
-		Map<String, Object> top = rows.get(0);
-		String v = str(top.get("v")).trim();
-		if (isEmpty(v) || "-".equals(v) || "\\N".equals(v)) {
-			v = "未记录";
+		if (total <= 0) {
+			return tag;
 		}
-		long c = toLong(top.get("c"));
-		if (total > 0) {
-			tag.setValue(v + "　" + round2(c * 100.0 / total) + "%");
-		} else {
-			tag.setValue(v);
-		}
+		tag.setValue(round2(yes * 100.0 / total) + "%");
 		return tag;
 	}
 
 	// ---------------------------------------------------------------- 工具
+
+	/**
+	 * 把是 / 否类的取值归一，无法识别时返回 null。
+	 * 该字段存在导入错位，混入了企业名称等非枚举值，必须先归一再用。
+	 */
+	private static String yesNo(Object v) {
+		String s = str(v).trim();
+		if (isEmpty(s) || "-".equals(s) || "\\N".equals(s)) {
+			return null;
+		}
+		if ("是".equals(s) || "1".equals(s) || "Y".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s)) {
+			return "是";
+		}
+		if ("否".equals(s) || "0".equals(s) || "N".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
+			return "否";
+		}
+		return null;
+	}
 
 	private static boolean isEmpty(String s) {
 		return s == null || s.trim().length() == 0;

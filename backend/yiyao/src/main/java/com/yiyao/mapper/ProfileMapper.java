@@ -118,16 +118,16 @@ public interface ProfileMapper {
 
 	// ---------------------------------------------------------------- 属性标签
 
-	@Select("SELECT is_essential_drug AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1")
+	@Select("SELECT is_essential_drug AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1 ORDER BY c DESC")
 	List<Map<String, Object>> essentialOfDrug(@Param("code") String code);
 
-	@Select("SELECT is_otc AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1")
+	@Select("SELECT is_otc AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1 ORDER BY c DESC")
 	List<Map<String, Object>> otcOfDrug(@Param("code") String code);
 
-	@Select("SELECT is_special_drug AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1")
+	@Select("SELECT is_special_drug AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1 ORDER BY c DESC")
 	List<Map<String, Object>> specialOfDrug(@Param("code") String code);
 
-	@Select("SELECT risk_pregnancy_grade AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1")
+	@Select("SELECT risk_pregnancy_grade AS v, COUNT(*) AS c FROM t_view_drug WHERE drug = #{code} GROUP BY 1 ORDER BY c DESC")
 	List<Map<String, Object>> pregnancyOfDrug(@Param("code") String code);
 
 	/**
@@ -142,4 +142,12 @@ public interface ProfileMapper {
 			+ "FROM prescription_diseases p JOIN t_view_drug g ON p.drug_code = g.drug "
 			+ "WHERE p.m_diagnostic1 = #{code} GROUP BY 1 ORDER BY c DESC LIMIT 2")
 	List<Map<String, Object>> otcOfDisease(@Param("code") String code);
+
+	/**
+	 * 疾病三级分类：细目所属的大类与中类名称，用于画像里显示层级归属
+	 */
+	@Select("SELECT COALESCE(NULLIF(disease_type_name11, ''), '未分类') AS cat, "
+			+ "COALESCE(NULLIF(disease_type_name12, ''), '未分类') AS sub "
+			+ "FROM t_view_disease WHERE disease_type13 = #{code} LIMIT 1")
+	Map<String, Object> diseaseHierarchy(@Param("code") String code);
 }
