@@ -1,8 +1,10 @@
 package com.yiyao.controller;
 
 import com.yiyao.output.DiseaseDrugUnionOutput;
+import com.yiyao.output.ProfileOutput;
 import com.yiyao.output.WebResult;
 import com.yiyao.service.DiseaseService;
+import com.yiyao.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,9 @@ public class DiseaseController {
 
 	@Autowired
 	private DiseaseService diseaseService;
+
+	@Autowired
+	private ProfileService profileService;
 
 	/**
 	 * 页面请求目标适应症关联药品组合分析数据
@@ -69,6 +74,26 @@ public class DiseaseController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			//返回异常结果
+			return new WebResult(e);
+		}
+	}
+
+	/**
+	 * 目标适应症画像。
+	 *
+	 * 与上面四个接口的区别：那些接口输出描述性统计，这里输出关联强度，
+	 * 用提升度区分「因为量大」与「对该适应症确实专用」。
+	 *
+	 * @param code    适应症编码，优先使用
+	 * @param keyword 关键词，编码为空时按名称模糊匹配并取处方量最大的一条
+	 */
+	@GetMapping("/profile")
+	public WebResult<ProfileOutput> diseaseProfile(@RequestParam(required = false) String code,
+												  @RequestParam(required = false) String keyword) {
+		try {
+			return new WebResult<>(profileService.diseaseProfile(code, keyword));
+		} catch (Exception e) {
+			e.printStackTrace();
 			return new WebResult(e);
 		}
 	}
