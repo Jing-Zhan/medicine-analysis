@@ -79,6 +79,24 @@ public class DiseaseController {
 	}
 
 	/**
+	 * 疾病费用负担。给出总金额与均次费用，用来区分「人多」与「花钱多」。
+	 *
+	 * @param level 11 大类、12 中类、13 细目
+	 * @param limit 返回条数，上限 30
+	 */
+	@GetMapping("/burden")
+	public WebResult<List<Map<String, Object>>> diseaseBurden(
+			@RequestParam(defaultValue = "11") int level,
+			@RequestParam(defaultValue = "10") int limit) {
+		try {
+			return new WebResult<>(profileService.diseaseBurden(level, limit));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
 	 * 疾病分层构成。
 	 *
 	 * @param level 11 大类、12 中类、13 细目

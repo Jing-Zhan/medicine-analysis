@@ -93,6 +93,19 @@ public class DrugController {
 	}
 
 	/**
+	 * 药品侧总览：合理用药指标与厂商份额、市场集中度。
+	 */
+	@GetMapping("/overview")
+	public WebResult<Map<String, Object>> drugOverview() {
+		try {
+			return new WebResult<>(profileService.drugOverview());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new WebResult(e);
+		}
+	}
+
+	/**
 	 * 药品属性构成。
 	 *
 	 * @param type  form_name1 剂型、is_essential_drug 基本药物、is_otc 非处方药、

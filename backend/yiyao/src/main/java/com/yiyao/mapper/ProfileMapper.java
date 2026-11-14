@@ -180,4 +180,51 @@ public interface ProfileMapper {
 			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug "
 			+ "GROUP BY 1 ORDER BY cnt DESC LIMIT #{limit}")
 	List<Map<String, Object>> drugAttribute(@Param("col") String col, @Param("limit") int limit);
+
+	// ---------------------------------------------------------------- 费用负担与市场结构
+
+	/**
+	 * 疾病费用负担：按疾病层级汇总处方数、金额与均次费用。
+	 * 走 agg_disease_total 四万行，不碰一百万行事实表。
+	 */
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name11, ''), '未分类') AS name, SUM(a.cnt) AS records, "
+			+ "ROUND(SUM(a.amount), 2) AS amount "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY amount DESC LIMIT #{limit}")
+	List<Map<String, Object>> burdenLevel11(@Param("limit") int limit);
+
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name12, ''), '未分类') AS name, SUM(a.cnt) AS records, "
+			+ "ROUND(SUM(a.amount), 2) AS amount "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY amount DESC LIMIT #{limit}")
+	List<Map<String, Object>> burdenLevel12(@Param("limit") int limit);
+
+	@Select("SELECT COALESCE(NULLIF(d.disease_type_name13, ''), '未分类') AS name, SUM(a.cnt) AS records, "
+			+ "ROUND(SUM(a.amount), 2) AS amount "
+			+ "FROM agg_disease_total a JOIN t_view_disease d ON a.disease_code = d.disease_type13 "
+			+ "GROUP BY 1 ORDER BY amount DESC LIMIT #{limit}")
+	List<Map<String, Object>> burdenLevel13(@Param("limit") int limit);
+
+	/**
+	 * 全部厂商的销售金额，用于计算份额、CR10 与 HHI。
+	 * 七千多行，一次取回在 Java 里算，避免在 SQL 里做多次聚合。
+	 */
+	@Select("SELECT COALESCE(NULLIF(g.company_name, ''), '未标注') AS name, "
+			+ "ROUND(SUM(a.amount), 2) AS amount "
+			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug "
+			+ "GROUP BY 1 ORDER BY amount DESC")
+	List<Map<String, Object>> vendorAmounts();
+
+	/**
+	 * 合理用药指标：按处方数加权的各类占比，一行返回全部分子与分母。
+	 */
+	@Select("SELECT "
+			+ "SUM(CASE WHEN g.form_name1 LIKE '%注射%' THEN a.cnt ELSE 0 END) AS inj, "
+			+ "SUM(CASE WHEN g.is_essential_drug = '是' THEN a.cnt ELSE 0 END) AS ess, "
+			+ "SUM(CASE WHEN g.is_otc = '是' THEN a.cnt ELSE 0 END) AS otc, "
+			+ "SUM(CASE WHEN g.is_special_drug = '是' THEN a.cnt ELSE 0 END) AS sp, "
+			+ "SUM(CASE WHEN g.drug_generic_name REGEXP '霉素|西林|头孢|沙星|环素|培南|硝唑|磺胺|呋喃' "
+			+ "THEN a.cnt ELSE 0 END) AS anti, SUM(a.cnt) AS total "
+			+ "FROM agg_drug_total a JOIN t_view_drug g ON a.drug_code = g.drug")
+	Map<String, Object> drugIndicators();
 }

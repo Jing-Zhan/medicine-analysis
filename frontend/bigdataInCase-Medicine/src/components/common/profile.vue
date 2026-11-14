@@ -1,30 +1,75 @@
 <template>
-    <div class="comp">
-        <div class="comp-head">
-            <span class="comp-title">{{ title }}</span>
-            <span class="comp-tabs">
+    <div class="mod">
+        <div class="mod-head">
+            <span class="mod-title">{{ title }}</span>
+            <span class="mod-tabs" v-if="mode === 'disease'">
                 <a v-for="t in tabs"
                    :key="t.key"
                    href="javascript:;"
-                   :class="['comp-tab', t.key === active ? 'on' : '']"
+                   :class="['mod-tab', t.key === active ? 'on' : '']"
                    @click="switchTab(t.key)">{{ t.label }}</a>
             </span>
-            <span class="comp-note">{{ note }}</span>
+            <span class="mod-note">{{ note }}</span>
         </div>
 
-        <div v-if="loading" class="comp-empty">数据加载中</div>
-        <div v-else-if="error" class="comp-empty">{{ error }}</div>
-        <div v-else-if="!items.length" class="comp-empty">暂无数据</div>
-
-        <div v-else class="comp-list">
-            <div class="comp-row" v-for="(it, i) in items" :key="it.Name">
-                <span class="comp-name" :title="it.Name">{{ it.Name }}</span>
-                <span class="comp-track">
-                    <span class="comp-fill" :style="{ width: barWidth(it.Ratio) }"></span>
-                </span>
-                <span class="comp-count">{{ fmt(it.Counter) }}</span>
-                <span class="comp-ratio">{{ it.Ratio }}%</span>
+        <div v-if="loading" class="mod-empty">数据加载中</div>
+        <div v-else-if="error" class="mod-empty">{{ error }}</div>
+        <div v-else-if="mode === 'drug'" class="mod-drug">
+            <div class="kpis">
+                <div class="kpi" v-for="k in indicators" :key="k.Label">
+                    <div class="kpi-val">{{ k.Value }}<em>%</em></div>
+                    <div class="kpi-lab">{{ k.Label }}</div>
+                </div>
             </div>
+
+            <div class="market-head">
+                <span class="market-title">厂商销售份额前十</span>
+                <span class="market-meta">
+                    厂商总数 {{ fmt(vendorCount) }}　
+                    CR10 {{ cr10 }}%　
+                    HHI {{ fmt(hhi) }}
+                </span>
+            </div>
+            <div class="vendors">
+                <div class="vendor-row" v-for="(v, i) in vendors" :key="v.Name">
+                    <span class="vendor-rank">{{ i + 1 }}</span>
+                    <span class="vendor-name" :title="v.Name">{{ v.Name }}</span>
+                    <span class="vendor-track">
+                        <span class="vendor-fill" :style="{ width: barWidth(v.Share, 8) }"></span>
+                    </span>
+                    <span class="vendor-amount">{{ fmt(v.Amount) }}</span>
+                    <span class="vendor-share">{{ v.Share }}%</span>
+                </div>
+                <div class="mod-empty" v-if="!vendors.length">暂无厂商数据</div>
+            </div>
+        </div>
+
+        <div v-else class="mod-disease">
+            <table class="tbl">
+                <thead>
+                <tr>
+                    <th class="c">#</th>
+                    <th>疾病分类</th>
+                    <th class="r">处方数</th>
+                    <th class="r">总金额 元</th>
+                    <th class="r">均次费用 元</th>
+                    <th class="r">占比</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(it, i) in burden" :key="it.Name">
+                    <td class="c">{{ i + 1 }}</td>
+                    <td class="name" :title="it.Name">{{ it.Name }}</td>
+                    <td class="r">{{ fmt(it.Records) }}</td>
+                    <td class="r">{{ fmt(it.Amount) }}</td>
+                    <td class="r strong">{{ fmt(it.AvgAmount) }}</td>
+                    <td class="r">{{ it.Share }}%</td>
+                </tr>
+                <tr v-if="!burden.length">
+                    <td colspan="6" class="c mod-empty">暂无数据</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -41,33 +86,32 @@
             }
         },
         data() {
-            const diseaseTabs = [
+            const tabs = [
                 {key: 'cat', label: '大类', param: 11},
                 {key: 'sub', label: '中类', param: 12},
                 {key: 'item', label: '细目', param: 13}
             ]
-            const drugTabs = [
-                {key: 'form_name1', label: '剂型', param: 'form_name1'},
-                {key: 'is_essential_drug', label: '基本药物', param: 'is_essential_drug'},
-                {key: 'is_otc', label: '非处方药', param: 'is_otc'},
-                {key: 'is_special_drug', label: '特殊管理', param: 'is_special_drug'},
-                {key: 'risk_pregnancy_grade', label: '妊娠风险', param: 'risk_pregnancy_grade'}
-            ]
-            const tabs = this.mode === 'drug' ? drugTabs : diseaseTabs
             return {
                 tabs: tabs,
-                active: tabs[0].key,
+                active: 'cat',
                 loading: false,
                 error: '',
-                items: []
+                burden: [],
+                indicators: [],
+                vendors: [],
+                vendorCount: 0,
+                cr10: 0,
+                hhi: 0
             }
         },
         computed: {
             title() {
-                return this.mode === 'drug' ? '药品属性构成' : '疾病分层构成'
+                return this.mode === 'drug' ? '用药结构与厂商份额' : '疾病费用负担'
             },
             note() {
-                return '占比为该类处方数占全库的比例'
+                return this.mode === 'drug'
+                    ? '占比按处方数加权，CR10 为前十厂商金额占比，HHI 越小越分散'
+                    : '均次费用为该类的总金额除以处方数，用于区分「人多」与「花钱多」'
             }
         },
         mounted() {
@@ -79,26 +123,45 @@
                 this.active = key
                 this.load()
             },
-            currentTab() {
-                for (var i = 0; i < this.tabs.length; i++) {
-                    if (this.tabs[i].key === this.active) return this.tabs[i]
-                }
-                return this.tabs[0]
-            },
             load() {
                 var self = this
-                var tab = self.currentTab()
-                var url = self.mode === 'drug' ? '/drug/attribute' : '/disease/category'
-                var data = self.mode === 'drug' ? {type: tab.param} : {level: tab.param}
                 self.loading = true
                 self.error = ''
+                if (self.mode === 'drug') {
+                    Vue.ajax.send({
+                        url: '/drug/overview',
+                        data: {},
+                        success: function (res) {
+                            self.loading = false
+                            if (!!res && res.code == '200' && res.data) {
+                                var d = res.data
+                                self.indicators = d.Indicators || []
+                                self.vendors = d.Vendors || []
+                                self.vendorCount = d.VendorCount || 0
+                                self.cr10 = d.Cr10 || 0
+                                self.hhi = d.Hhi || 0
+                            } else {
+                                self.error = (res && res.msg) ? res.msg : '查询失败'
+                            }
+                        },
+                        error: function () {
+                            self.loading = false
+                            self.error = '接口请求失败'
+                        }
+                    })
+                    return
+                }
+                var level = 11
+                for (var i = 0; i < self.tabs.length; i++) {
+                    if (self.tabs[i].key === self.active) level = self.tabs[i].param
+                }
                 Vue.ajax.send({
-                    url: url,
-                    data: data,
+                    url: '/disease/burden',
+                    data: {level: level},
                     success: function (res) {
                         self.loading = false
                         if (!!res && res.code == '200' && res.data) {
-                            self.items = res.data || []
+                            self.burden = res.data || []
                         } else {
                             self.error = (res && res.msg) ? res.msg : '查询失败'
                         }
@@ -115,11 +178,10 @@
                 if (isNaN(n)) return String(v)
                 return n.toLocaleString('zh-CN')
             },
-            barWidth(ratio) {
-                var n = Number(ratio)
+            barWidth(share, full) {
+                var n = Number(share)
                 if (isNaN(n) || n <= 0) return '0%'
-                // 以 40% 为满格，超过则截断，使头部差异可见
-                var w = n / 40 * 100
+                var w = n / full * 100
                 if (w > 100) w = 100
                 return (w < 2 ? 2 : w) + '%'
             }
@@ -128,17 +190,17 @@
 </script>
 
 <style scoped>
-    .comp {
+    .mod {
         clear: both;
         width: 100%;
         margin-top: 20px;
         background: #fff;
         border: 1px solid #e2e8f0;
-        padding: 16px 18px 14px;
+        padding: 16px 18px 16px;
         box-sizing: border-box;
     }
 
-    .comp-head {
+    .mod-head {
         display: flex;
         align-items: center;
         border-bottom: 1px solid #e2e8f0;
@@ -146,7 +208,7 @@
         margin-bottom: 12px;
     }
 
-    .comp-title {
+    .mod-title {
         font-size: 16px;
         color: #1f5fa8;
         font-weight: 600;
@@ -154,11 +216,11 @@
         white-space: nowrap;
     }
 
-    .comp-tabs {
+    .mod-tabs {
         flex: 1;
     }
 
-    .comp-tab {
+    .mod-tab {
         display: inline-block;
         padding: 3px 12px;
         margin-right: 6px;
@@ -169,38 +231,92 @@
         text-decoration: none;
     }
 
-    .comp-tab.on {
+    .mod-tab.on {
         color: #fff;
         background: #1f5fa8;
         border-color: #1f5fa8;
     }
 
-    .comp-note {
+    .mod-note {
         font-size: 12px;
         color: #8496a8;
-        white-space: nowrap;
     }
 
-    .comp-empty {
-        padding: 32px 0;
+    .mod-empty {
+        padding: 28px 0;
         text-align: center;
         color: #8496a8;
         font-size: 13px;
     }
 
-    .comp-list {
-        padding: 2px 0;
+    /* ---------- 指标卡 ---------- */
+    .kpis {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
     }
 
-    .comp-row {
+    .kpi {
+        flex: 1 1 0;
+        border: 1px solid #e8eef5;
+        border-top: 3px solid #1f5fa8;
+        background: #f6fafd;
+        padding: 12px 14px;
+    }
+
+    .kpi-val {
+        font-size: 22px;
+        font-weight: 600;
+        color: #1f5fa8;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-val em {
+        font-style: normal;
+        font-size: 13px;
+        margin-left: 2px;
+    }
+
+    .kpi-lab {
+        font-size: 12.5px;
+        color: #6b7c8f;
+        margin-top: 4px;
+    }
+
+    /* ---------- 厂商 ---------- */
+    .market-head {
+        display: flex;
+        align-items: baseline;
+        margin-bottom: 8px;
+    }
+
+    .market-title {
+        font-size: 13px;
+        color: #1f5fa8;
+        margin-right: 14px;
+    }
+
+    .market-meta {
+        font-size: 12.5px;
+        color: #6b7c8f;
+    }
+
+    .vendor-row {
         display: flex;
         align-items: center;
-        padding: 5px 0;
         font-size: 13px;
+        padding: 4px 0;
     }
 
-    .comp-name {
-        flex: 0 0 300px;
+    .vendor-rank {
+        flex: 0 0 24px;
+        color: #8496a8;
+        text-align: center;
+    }
+
+    .vendor-name {
+        flex: 0 0 260px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -208,41 +324,96 @@
         padding-right: 12px;
     }
 
-    .comp-track {
+    .vendor-track {
         flex: 1 1 auto;
         height: 10px;
         background: #eef2f7;
         margin-right: 12px;
     }
 
-    .comp-fill {
+    .vendor-fill {
         display: block;
         height: 10px;
         background: #5b9bd5;
     }
 
-    .comp-count {
-        flex: 0 0 92px;
+    .vendor-amount {
+        flex: 0 0 110px;
         text-align: right;
         color: #33414f;
         font-variant-numeric: tabular-nums;
         padding-right: 14px;
     }
 
-    .comp-ratio {
-        flex: 0 0 62px;
+    .vendor-share {
+        flex: 0 0 64px;
         text-align: right;
         color: #6b7c8f;
         font-variant-numeric: tabular-nums;
     }
 
+    /* ---------- 费用表 ---------- */
+    .tbl {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .tbl th {
+        text-align: left;
+        font-weight: 600;
+        color: #6b7c8f;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 7px 8px;
+        white-space: nowrap;
+    }
+
+    .tbl td {
+        padding: 7px 8px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #33414f;
+    }
+
+    .tbl tbody tr:hover {
+        background: #f7fafd;
+    }
+
+    .tbl .r {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tbl .c {
+        text-align: center;
+    }
+
+    .tbl .name {
+        max-width: 420px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .tbl .strong {
+        color: #1f5fa8;
+        font-weight: 600;
+    }
+
     @media (max-width: 1200px) {
-        .comp-name {
-            flex: 0 0 200px;
+        .mod-note {
+            display: none;
         }
 
-        .comp-note {
-            display: none;
+        .vendor-name {
+            flex: 0 0 180px;
+        }
+
+        .kpis {
+            flex-wrap: wrap;
+        }
+
+        .kpi {
+            flex: 1 1 30%;
         }
     }
 </style>

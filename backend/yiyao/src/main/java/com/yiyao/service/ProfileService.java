@@ -366,6 +366,106 @@ public class ProfileService {
 		return out;
 	}
 
+	// ---------------------------------------------------------------- 费用负担与市场结构
+
+	/**
+	 * 疾病费用负担。除了处方数，还给出总金额与均次费用，
+	 * 用来区分「得病的人多」和「花钱多」，这两件事在管理上完全不同的。
+	 */
+	public List<Map<String, Object>> diseaseBurden(int level, int limit) {
+		int n = limit <= 0 ? 10 : Math.min(limit, 30);
+		List<Map<String, Object>> rows;
+		if (level == 12) {
+			rows = mapper.burdenLevel12(n);
+		} else if (level == 13) {
+			rows = mapper.burdenLevel13(n);
+		} else {
+			rows = mapper.burdenLevel11(n);
+		}
+		long grand = mapper.grandTotal();
+		List<Map<String, Object>> out = new ArrayList<>();
+		if (rows == null) {
+			return out;
+		}
+		for (Map<String, Object> row : rows) {
+			long records = toLong(row.get("records"));
+			double amount = toDouble(row.get("amount"));
+			Map<String, Object> item = new LinkedHashMap<>();
+			item.put("name", str(row.get("name")));
+			item.put("records", records);
+			item.put("amount", round2(amount));
+			item.put("avgAmount", records > 0 ? round2(amount / records) : 0D);
+			item.put("share", grand > 0 ? round2(records * 100.0 / grand) : 0D);
+			out.add(item);
+		}
+		return out;
+	}
+
+	/**
+	 * 药品侧总览：合理用药四项指标 + 厂商份额与市场集中度。
+	 *
+	 * CR10 为前十大厂商的金额占比，HHI 为各厂商份额百分比的平方和，
+	 * 两者都是市场结构的常用度量，数值越小说明越分散。
+	 */
+	public Map<String, Object> drugOverview() {
+		Map<String, Object> out = new LinkedHashMap<>();
+
+		// 合理用药指标
+		Map<String, Object> ind = mapper.drugIndicators();
+		List<Map<String, Object>> indicators = new ArrayList<>();
+		if (ind != null) {
+			long total = toLong(ind.get("total"));
+			indicators.add(indicator("注射剂使用率", toLong(ind.get("inj")), total));
+			indicators.add(indicator("基本药物使用率", toLong(ind.get("ess")), total));
+			indicators.add(indicator("抗菌药物使用率", toLong(ind.get("anti")), total));
+			indicators.add(indicator("非处方药占比", toLong(ind.get("otc")), total));
+			indicators.add(indicator("特殊管理药品占比", toLong(ind.get("sp")), total));
+		}
+		out.put("indicators", indicators);
+
+		// 厂商份额
+		List<Map<String, Object>> rows = mapper.vendorAmounts();
+		double totalAmount = 0D;
+		if (rows != null) {
+			for (Map<String, Object> row : rows) {
+				totalAmount += toDouble(row.get("amount"));
+			}
+		}
+		List<Map<String, Object>> vendors = new ArrayList<>();
+		double cr10 = 0D;
+		double hhi = 0D;
+		if (rows != null && totalAmount > 0) {
+			int idx = 0;
+			for (Map<String, Object> row : rows) {
+				double amount = toDouble(row.get("amount"));
+				double share = amount * 100.0 / totalAmount;
+				hhi += share * share;
+				if (idx < 10) {
+					cr10 += share;
+					Map<String, Object> item = new LinkedHashMap<>();
+					item.put("name", str(row.get("name")));
+					item.put("amount", round2(amount));
+					item.put("share", round2(share));
+					vendors.add(item);
+				}
+				idx++;
+			}
+		}
+		out.put("vendors", vendors);
+		out.put("vendorCount", rows == null ? 0 : rows.size());
+		out.put("cr10", round2(cr10));
+		out.put("hhi", Math.round(hhi));
+		out.put("totalAmount", round2(totalAmount));
+		return out;
+	}
+
+	private Map<String, Object> indicator(String label, long part, long total) {
+		Map<String, Object> m = new LinkedHashMap<>();
+		m.put("label", label);
+		m.put("value", total > 0 ? round2(part * 100.0 / total) : 0D);
+		return m;
+	}
+
 	// ---------------------------------------------------------------- 工具
 
 	/**
