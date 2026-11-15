@@ -832,14 +832,21 @@ for i, (name, cnt, desc, cost) in enumerate(paths):
     txt(s, x + 3.1, 4.14, 1.8, 0.34, [dict(text=cnt, size=13.5, bold=True, color=INK, align=PP_ALIGN.RIGHT)])
     txt(s, x + 0.32, 4.54, pw - 0.62, 0.34, [dict(text=desc, size=11.5, color=INK2)])
     txt(s, x + 0.32, 4.9, pw - 0.62, 0.28, [dict(text="实测 " + cost, size=10.5, color=MUTED)])
-card(s, LEFT, 5.44, CW, 1.32, STEEL, "页面怎么拿到这些数", title_size=13.5)
-facts = ["接口统一包一层 code 与 data，前端按 data 取数，失败时给出错误提示",
-         "字段名统一转成首字母大写下发，十二张图共用一套取数写法",
-         "图表只做渲染，取数写在组件的 load 方法；前端超时 60 秒"]
-fy3 = 5.87
-for t in facts:
-    txt(s, LEFT + 0.3, fy3, CW - 0.6, 0.3, [dict(text="· " + t, size=11.5, color=INK2)])
-    fy3 += 0.3
+card(s, LEFT, 5.3, CW, 1.6, STEEL,
+     "用做菜理解这六个环节：原料不直接上桌，能预制的先预制，点单时才决定去哪取",
+     title_size=13.5)
+kitchen = [("备料", "MySQL 是菜市场，原始食材都在这儿；Hive 是冷库，全量码放"),
+           ("预制", "Kylin 是中央厨房，标准套餐提前做好；agg 表是按菜单备好的配菜"),
+           ("上菜", "接口是点单台，按单取；前端摆盘")]
+kw = (CW - 0.6) / 3
+for i, (k, v) in enumerate(kitchen):
+    x = LEFT + 0.3 + i * (kw + 0.0)
+    rect(s, x, 5.84, 0.055, 0.34, fill=STEEL)
+    txt(s, x + 0.18, 5.84, 1.0, 0.3, [dict(text=k, size=13, bold=True, color=STEEL)])
+    txt(s, x + 1.05, 5.8, kw - 1.15, 0.66, [dict(text=v, size=11, color=INK2, ls=1.25)])
+txt(s, LEFT + 0.3, 6.52, CW - 0.6, 0.3,
+    [dict(text="对应上面的两条路径：命中 Cube 等于中央厨房直接出餐，转 MySQL 等于拿配菜现做",
+          size=11.5, color=MUTED)])
 footer(s, STEEL, 22)
 
 # ================================================================ 23 Kylin
