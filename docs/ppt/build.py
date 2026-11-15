@@ -277,8 +277,8 @@ toc = [("01", "项目背景", "为什么做、总体思路、数据基础", "03"
        ("03", "项目结果", "系统输出、三页实证、结构对比、数据校验", "11", TEAL),
        ("04", "实施过程与方法", "六个阶段、部署方式、启动日志", "17", GOLD),
        ("05", "技术原理与架构", "数据流向、Kylin 与 Cube、引擎切换", "22", STEEL),
-       ("06", "组织与管理", "人员分工与五天进度", "25", SLATE),
-       ("07", "总结", "完成情况与后续计划", "26", NAVY)]
+       ("06", "组织与管理", "人员分工、五天进度与成员自述", "25", SLATE),
+       ("07", "总结", "完成情况与后续计划", "31", NAVY)]
 y = 2.02
 for num, name, desc, pg, color in toc:
     rect(s, LEFT, y, CW, 0.66, fill=WHITE, line=LINE, lw=0.8)
@@ -896,12 +896,13 @@ footer(s, STEEL, 24)
 
 # ================================================================ 25 分工
 s = new_slide()
-header(s, SLATE, "06　组织与管理", "06", "人员分工与进度安排", "五天排期，每天有明确产出")
+header(s, SLATE, "06　组织与管理", "06", "人员分工与进度安排",
+       "五天排期，每天有明确产出；后五页由五位成员分别自述")
 rows = [["成员", "角色", "承担工作", "交付物"],
-        ["占竞", "组长", "架构设计、Kylin 建模、后端接口", "13 个接口与查询网关"],
-        ["李艺淼", "数据", "数据清洗、Cube 构建、可视化大屏", "bi_cube 与 Django 大屏"],
-        ["付悌安", "前端", "三套页面、图表组件、结构对比模块", "12 张图表与对比表"],
-        ["杨博文", "文档", "需求规格、部署验收、数据集与基准值", "五份文档"],
+        ["占竞", "组长", "排期分工、集群启动、Kylin 建模与 Cube、后端接口", "13 个接口与启动脚本"],
+        ["李艺淼", "数据", "Hive 建表与外部表关联、Django 大屏、五张图取数", "bigdata 表与大屏工程"],
+        ["付悌安", "前端", "六表导入、前端页面与图表、结构对比模块", "100 万行数据与 dist"],
+        ["杨博文", "文档", "需求规格、部署验收、数据集与基准值", "五份文档与 11 项基准值"],
         ["洪嘉伟", "测试", "接口性能、数据一致性、验收用例", "测试用例与校验脚本"]]
 th = make_table(s, LEFT, BODY, CW, [0.1, 0.09, 0.48, 0.33], rows, font=12.5, head_font=12.5,
                 row_h=0.5, head_h=0.48, accent=SLATE)
@@ -919,6 +920,111 @@ for i, (d, name, out) in enumerate(days):
     txt(s, x + 0.18, dy + 0.84, dw - 0.3, 0.42,
         [dict(text=out, size=11, color=tint(SLATE, 0.8), ls=1.2)])
 footer(s, SLATE, 25)
+
+# ================================================================ 成员自述页
+def _u(t, sz):
+    return sum(1.0 if ord(c) > 127 else 0.55 for c in t) * sz / 72.0
+
+
+def member_page(page, accent, name, role, headline, points, delivs, stat, days, say):
+    s = new_slide()
+    header(s, accent, "06　组织与管理", "06", name, headline)
+    cx = LEFT + 0.444 * len(name) + 0.26
+    cw = _u(role, 13) + 0.36
+    rect(s, cx, 0.74, cw, 0.42, fill=tint(accent, 0.87), line=tint(accent, 0.55), lw=0.8)
+    txt(s, cx, 0.84, cw, 0.3,
+        [dict(text=role, size=13, bold=True, color=accent, align=PP_ALIGN.CENTER)])
+    txt(s, LEFT, BODY, 7.0, 0.32, [dict(text="我做了什么", size=15, bold=True, color=INK)])
+    py = BODY + 0.46
+    for i, t in enumerate(points):
+        rect(s, LEFT, py, 0.34, 0.34, fill=accent, shape=MSO_SHAPE.OVAL)
+        txt(s, LEFT, py + 0.05, 0.34, 0.26,
+            [dict(text=str(i + 1), size=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)])
+        txt(s, LEFT + 0.52, py + 0.03, 6.5, 0.7, [dict(text=t, size=13.5, color=INK2, ls=1.24)])
+        py += 0.72
+    card(s, 8.0, BODY, 4.71, 2.14, accent, "交付物", title_size=13.5)
+    dy = BODY + 0.52
+    for d in delivs:
+        rect(s, 8.26, dy + 0.11, 0.09, 0.09, fill=accent, shape=MSO_SHAPE.OVAL)
+        txt(s, 8.52, dy, 3.95, 0.32, [dict(text=d, size=12, color=INK2)])
+        dy += 0.48
+    rect(s, 8.0, 4.3, 4.71, 1.04, fill=tint(accent, 0.9), line=tint(accent, 0.5), lw=0.9)
+    rect(s, 8.0, 4.3, 0.07, 1.04, fill=accent)
+    nw = _u(stat[0], 24)
+    txt(s, 8.26, 4.4, nw + 0.1, 0.42, [dict(text=stat[0], size=24, bold=True, color=accent)])
+    txt(s, 8.26 + nw + 0.2, 4.56, 4.4 - nw, 0.28, [dict(text=stat[1], size=12.5, color=INK2)])
+    txt(s, 8.26, 4.92, 4.2, 0.28, [dict(text=stat[2], size=10.5, color=MUTED)])
+    txt(s, LEFT, 5.5, 3.0, 0.3, [dict(text="参与阶段", size=12.5, bold=True, color=accent)])
+    week = ["11-11", "11-12", "11-13", "11-14", "11-15"]
+    cw5 = (CW - 0.4) / 5
+    for i, d in enumerate(week):
+        x = LEFT + i * (cw5 + 0.1)
+        on = i in days
+        rect(s, x, 5.82, cw5, 0.5, fill=accent if on else WHITE,
+             line=None if on else LINE, lw=0.9)
+        txt(s, x, 5.94, cw5, 0.28,
+            [dict(text=d, size=12, bold=on, color=WHITE if on else MUTED, align=PP_ALIGN.CENTER)])
+    rect(s, LEFT, 6.4, CW, 0.46, fill=tint(accent, 0.92), line=tint(accent, 0.55), lw=0.8)
+    txt(s, LEFT + 0.28, 6.5, 1.3, 0.28, [dict(text="答辩分工", size=11.5, bold=True, color=accent)])
+    txt(s, LEFT + 1.52, 6.5, CW - 1.8, 0.28, [dict(text=say, size=11.5, color=INK2)])
+    footer(s, accent, page)
+    return s
+
+
+member_page(26, NAVY, "占竞", "组长 · 架构与集群",
+            "排期与分工，把集群、Cube 与 13 个接口从零跑通",
+            ["排期与任务下发，每天记录已完成与阻塞项",
+             "六个组件按序启动与巡检，端口逐个确认",
+             "Kylin 建模与 Cube 构建，八维两度量、256 个 cuboid",
+             "后端 13 个接口调通，部署联调与答辩主讲"],
+            ["可用集群与启动脚本", "bi_cube 与构建参数", "13 个接口与部署记录"],
+            ("256", "个 cuboid", "构建一次 23.13 分钟，占用 2.95 GB"),
+            [0, 1, 2, 3, 4],
+            "集群与组件启动、Cube 构建、接口联调")
+
+member_page(27, TEAL, "李艺淼", "数据仓库 · 大屏",
+            "把 Hive 表关联好，再用 Django 把五张大屏图做出来",
+            ["Hive 建库建表，外部表关联，逐个核对行数",
+             "Django 工程搭建，套用下发的模板与静态资源",
+             "五张图取数：省份地图、药品前十、病症前十、关系图",
+             "省份名称对照，让地图点位与库里的名字对上"],
+            ["bigdata 库表与关联结果", "Django 大屏工程", "五张图与取数说明"],
+            ("5", "张大屏图表", "运行在 8000 端口，另有省份名称对照表"),
+            [1, 2, 3],
+            "数仓建表与关联、大屏取数")
+
+member_page(28, OXBLOOD, "付悌安", "数据导入 · 前端",
+            "把一百万行导入 MySQL，再把十二张图逐页走查、打包交付",
+            ["MySQL 建库与六张表导入，核对到 100 万行",
+             "前端依赖安装与地址配置，十二张图逐页走查",
+             "npm run build 打出 dist，交给部署",
+             "新增科室用药结构对比模块，与页面联调"],
+            ["yiyao 库六张表", "dist 构建产物", "结构对比模块"],
+            ("100", "万行数据入库", "六张表，前端十二张图逐页走查"),
+            [0, 1, 2, 3],
+            "数据导入、页面与图表、打包部署")
+
+member_page(29, GOLD, "杨博文", "文档 · 基准值",
+            "把过程写成五份文档，并把十一项基准值固化成核对表",
+            ["需求规格、数据集说明、部署与验收说明",
+             "数据基准值文档，十一项指标逐条写清口径",
+             "12 个接口的基准值核对表，与页面数值比对",
+             "文档版本管理与终版排版"],
+            ["五份交付文档", "11 项基准值", "基准值核对表"],
+            ("11", "项基准值", "写清口径，可重复导出比对"),
+            [0, 3, 4],
+            "文档体系、基准值核对")
+
+member_page(30, STEEL, "洪嘉伟", "测试 · 验收",
+            "十七条件用例逐条跑，接口计时与总额校验都有据可查",
+            ["17 条功能用例编写与执行，缺陷逐条记录",
+             "13 个接口逐个计时，最慢 15.26 秒",
+             "总额校验，定位 31,686.68 元差额来自 1,164 行空值",
+             "测试报告与验收清单"],
+            ["测试用例与报告", "接口计时与校验脚本", "验收清单"],
+            ("17", "条用例", "13 个接口全部返回 200"),
+            [1, 2, 3, 4],
+            "测试用例、接口性能与数据校验")
 
 # ================================================================ 26 总结
 s = new_slide()
@@ -950,7 +1056,7 @@ rect(s, LEFT, 6.3, CW, 0.6, fill=NAVY)
 txt(s, LEFT + 0.32, 6.42, CW - 0.6, 0.36,
     [dict(text="http://192.168.207.179:83/　　大屏 http://192.168.207.179:8000/　　代码与文档已提交",
           size=13, bold=True, color=WHITE)])
-footer(s, NAVY, 26)
+footer(s, NAVY, 31)
 
 out_dir = os.path.dirname(os.path.abspath(__file__))
 out_path = os.path.join(out_dir, "目标适应症及用药数据分析系统_汇报PPT.pptx")
