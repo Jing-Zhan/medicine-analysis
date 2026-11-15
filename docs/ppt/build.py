@@ -657,43 +657,53 @@ footer(s, GOLD, 17)
 
 # ================================================================ 18 阶段一二
 s = new_slide()
-header(s, GOLD, "04　实施过程与方法", "04", "阶段一二：环境搭建与数据入仓",
-       "集群与数据库分别用脚本拉起，端口逐个校验")
-rect(s, LEFT, BODY, 6.0, 3.24, fill=NAVY)
-txt(s, LEFT + 0.3, BODY + 0.18, 5.4, 0.28,
-    [dict(text="实际操作命令", size=10.5, color=tint(NAVY, 0.6), font=MONO)])
-cmd = ["bash /opt/start-cluster.sh", "ss -lnt | grep -E '2181|9000|8088'", "",
-       "hdfs dfs -ls /bi_data/mysql", "mysql -uroot -p yiyao -e \\",
-       "  'SELECT COUNT(*) FROM prescription_diseases;'"]
-cy = BODY + 0.56
+header(s, GOLD, "04\u3000实施过程与方法", "04", "阶段一二：容器环境、集群启动与数据入仓",
+       "平台用容器提供实验环境，六个组件在容器内启动")
+rect(s, LEFT, BODY, 6.15, 2.24, fill=NAVY)
+txt(s, LEFT + 0.3, BODY + 0.12, 5.5, 0.26,
+    [dict(text="先看容器，再进容器", size=10, color=tint(NAVY, 0.6), font=MONO)])
+cmd = ["docker ps -a", "docker start <容器名>", "docker exec -it <容器名> bash",
+       "bash /opt/start-cluster.sh", "ss -lnt | grep -E '2181|9000|8088'"]
+cy = BODY + 0.46
 for line in cmd:
-    if line:
-        txt(s, LEFT + 0.3, cy, 5.5, 0.3, [dict(text=line, size=11.5, color=tint(NAVY, 0.8), font=MONO)])
-    cy += 0.36
-txt(s, LEFT, 5.46, 6.0, 0.32, [dict(text="两个数据处理细节", size=14, bold=True, color=GOLD)])
-chips2 = [("回车符", "分组时同一名称被拆成两项，清洗时统一去掉"),
-          ("后缀列", "生成列 drug_code 与业务列 drug 并存，关联用后者")]
-cx2 = LEFT
-for k, v in chips2:
-    rect(s, cx2, 5.84, 2.95, 1.04, fill=WHITE, line=LINE, lw=0.8)
-    rect(s, cx2, 5.84, 0.07, 1.04, fill=GOLD)
-    txt(s, cx2 + 0.24, 5.94, 2.6, 0.28, [dict(text=k, size=12, bold=True, color=GOLD)])
-    txt(s, cx2 + 0.24, 6.24, 2.6, 0.56, [dict(text=v, size=11, color=MUTED, ls=1.18)])
-    cx2 += 3.05
-txt(s, 6.95, BODY, 5.76, 0.32, [dict(text="九个端口逐项校验", size=14, bold=True, color=GOLD)])
+    txt(s, LEFT + 0.3, cy, 5.6, 0.28, [dict(text=line, size=11.5, color=tint(NAVY, 0.82), font=MONO)])
+    cy += 0.34
+txt(s, LEFT, 4.34, 6.15, 0.3, [dict(text="数据入仓", size=13, bold=True, color=GOLD)])
+rect(s, LEFT, 4.68, 6.15, 0.96, fill=NAVY)
+txt(s, LEFT + 0.3, 4.78, 5.6, 0.26,
+    [dict(text="hdfs dfs -ls /bi_data/mysql", size=11, color=tint(NAVY, 0.82), font=MONO)])
+txt(s, LEFT + 0.3, 5.1, 5.6, 0.48,
+    [dict(text="mysql -uroot -p yiyao -e 'SELECT COUNT(*) FROM prescription_diseases;'",
+          size=10, color=tint(NAVY, 0.82), font=MONO)])
+rect(s, LEFT, 5.78, 6.15, 1.02, fill=tint(GOLD, 0.9), line=tint(GOLD, 0.55), lw=0.9)
+txt(s, LEFT + 0.28, 5.88, 5.6, 0.28, [dict(text="入仓后核对到的规模", size=11.5, bold=True, color=GOLD)])
+txt(s, LEFT + 0.28, 6.2, 5.6, 0.5,
+    [dict(text="处方明细 1,000,000 行　疾病 42,501 条　药品 205,971 种　HDFS 6 个目录",
+          size=11, color=INK2, ls=1.2)])
+
+txt(s, 7.0, BODY, 5.71, 0.32, [dict(text="容器环境的四个概念", size=15, bold=True, color=GOLD)])
+concepts = [("镜像", "把 Hadoop、Kylin 的安装状态打成一份文件，换机器不用重新配"),
+            ("容器", "镜像跑起来就是容器，六个组件与两个应用都在同一个容器里"),
+            ("数据卷", "代码目录与 MySQL 数据挂到宿主机，容器重建数据不丢"),
+            ("端口映射", "容器端口映射到宿主机同号端口，页面才能用 IP 访问")]
+cy2 = BODY + 0.36
+for k, v in concepts:
+    rect(s, 7.0, cy2, 5.71, 0.74, fill=WHITE, line=LINE, lw=0.8)
+    rect(s, 7.0, cy2, 0.07, 0.74, fill=GOLD)
+    txt(s, 7.26, cy2 + 0.1, 1.25, 0.3, [dict(text=k, size=12.5, bold=True, color=GOLD)])
+    txt(s, 8.58, cy2 + 0.07, 3.98, 0.6, [dict(text=v, size=10.5, color=INK2, ls=1.2)])
+    cy2 += 0.82
+txt(s, 7.0, 5.62, 5.71, 0.28, [dict(text="九个端口逐个校验", size=12, bold=True, color=GOLD)])
 checks = [("2181", "ZooKeeper"), ("9000", "HDFS"), ("8088", "YARN"), ("16010", "HBase"),
           ("9083", "Hive"), ("7070", "Kylin"), ("3306", "MySQL"), ("83", "接口"), ("8000", "大屏")]
 for i, (port, name) in enumerate(checks):
-    x = 6.95 + (i % 3) * 1.92
-    y = BODY + 0.4 + (i // 3) * 0.62
-    rect(s, x, y, 1.86, 0.52, fill=WHITE, line=LINE, lw=0.7)
-    txt(s, x + 0.16, y + 0.12, 0.78, 0.3, [dict(text=port, size=12.5, bold=True, color=GOLD, font=MONO)])
-    txt(s, x + 0.92, y + 0.14, 0.88, 0.26, [dict(text=name, size=10.5, color=MUTED)])
-txt(s, 6.95, 4.54, 5.76, 0.32, [dict(text="数据规模", size=14, bold=True, color=GOLD)])
-rows = [["数据项", "数量"], ["处方与用药明细", "1,000,000 行"], ["疾病维度", "42,501 个"],
-        ["药品维度", "205,971 种"], ["HDFS 数据目录", "6 个"]]
-make_table(s, 6.95, 4.92, 5.76, [0.6, 0.4], rows, font=12, head_font=12,
-           row_h=0.4, head_h=0.4, accent=GOLD, aligns=[PP_ALIGN.LEFT, PP_ALIGN.RIGHT])
+    x = 7.0 + (i % 5) * 1.14
+    y = 5.94 + (i // 5) * 0.46
+    w0 = 1.1
+    rect(s, x, y, w0, 0.42, fill=WHITE, line=LINE, lw=0.7)
+    txt(s, x + 0.08, y + 0.04, w0 - 0.14, 0.18,
+        [dict(text=port, size=10, bold=True, color=GOLD, font=MONO)])
+    txt(s, x + 0.08, y + 0.21, w0 - 0.14, 0.18, [dict(text=name, size=8, color=MUTED)])
 footer(s, GOLD, 18)
 
 # ================================================================ 19 阶段三四
