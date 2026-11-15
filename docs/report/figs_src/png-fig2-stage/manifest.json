@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "backend": "native",
+  "rasterEngine": "pdfium",
+  "source": "saved",
+  "inputPath": "D:\\大三上作业\\数据实训\\medicine-analysis\\docs\\report\\figs_src\\fig2-stage.pdf",
+  "sourceSha256": "4432780b0f208744b9df17749579a4601fbc02a4b656eddda58659b044df8943",
+  "dpi": 300,
+  "pageCount": 1,
+  "images": [
+    {
+      "index": 1,
+      "page": 1,
+      "path": "D:\\大三上作业\\数据实训\\medicine-analysis\\docs\\report\\figs_src\\png-fig2-stage\\page-0001.png",
+      "width": 1890,
+      "height": 735,
+      "rectangle": {
+        "x": 0,
+        "y": 0,
+        "width": 604.8,
+        "height": 235.2
+      },
+      "byteLength": 101286
+    }
+  ],
+  "missingFonts": []
+}
