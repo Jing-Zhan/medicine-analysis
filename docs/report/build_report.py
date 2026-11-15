@@ -15,7 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FIGDIR = os.path.join(HERE, "figs")
 DELIV = os.path.join(FIGDIR, "deliver")
 SHOT = os.path.join(os.path.dirname(HERE), "ppt", "figures")
-OUT = os.path.join(HERE, "项目实训总结报告-目标适应症及用药数据分析系统.docx")
+OUT = os.path.join(HERE, "项目实训总结报告-目标适应症及用药数据分析系统-终版.docx")
 
 SONG = "宋体"
 LATIN = "Times New Roman"
@@ -51,13 +51,27 @@ def set_font(run, size=12, bold=False, italic=False, mono=False, color=None):
     return run
 
 
+CITE = re.compile(r"\{\{([0-9,\-]+)\}\}")
+
+
 def runs(p, text, size=12, bold=False, italic=False, color=None):
-    """支持 **加粗** 的内联标记。"""
-    for i, seg in enumerate(re.split(r"\*\*(.+?)\*\*", text)):
-        if not seg:
-            continue
-        r = p.add_run(seg)
-        set_font(r, size=size, bold=bold or (i % 2 == 1), italic=italic, color=color)
+    """支持 **加粗** 与 {{n}} 上标引文两种内联标记。"""
+    pos = 0
+    for m in CITE.finditer(text):
+        head = text[pos:m.start()]
+        for k, seg in enumerate(re.split(r"\*\*(.+?)\*\*", head)):
+            if seg:
+                r = p.add_run(seg)
+                set_font(r, size=size, bold=bold or (k % 2 == 1), italic=italic, color=color)
+        r = p.add_run("[" + m.group(1) + "]")
+        set_font(r, size=size - 1, bold=False, color=color)
+        r.font.superscript = True
+        pos = m.end()
+    tail = text[pos:]
+    for k, seg in enumerate(re.split(r"\*\*(.+?)\*\*", tail)):
+        if seg:
+            r = p.add_run(seg)
+            set_font(r, size=size, bold=bold or (k % 2 == 1), italic=italic, color=color)
     return p
 
 
@@ -548,28 +562,32 @@ P("需要说明项目的边界。下发的数据只覆盖 2008 年 12 月一个�
   "第四章单独说明处理方式。")
 
 H2("（二）国内外研究现状")
-P("数据仓库领域目前以维度建模为主流方法。它的基本做法是把业务过程抽象成事实表与维表，"
-  "事实表记录发生了什么以及可累加的度量，维表保存描述性属性，查询时按维表上的属性对事实表分组汇总。"
+P("数据仓库领域目前以维度建模为主流方法{{1}}。它的基本做法是把业务过程抽象成事实表与维表，"
+  "事实表记录发生了什么以及可累加的度量，维表保存描述性属性，查询时按维表上的属性对事实表分组汇总{{2}}。"
   "这种结构把数据组织成星型，事实表位于中心，维表分布在外围，优点是结构稳定、查询语义清晰，"
-  "缺点是维度一多，按任意组合聚合的代价会随数据量线性上升。")
-P("为降低聚合代价，工程上出现了预计算思路。Apache Kylin 是其中较有代表性的一种实现，"
-  "2013 年由 eBay 开源，2014 年进入 Apache 基金会并成为顶级项目。它的核心是把多维组合提前物化，"
-  "每一个维度组合对应一个 cuboid，构建阶段把所有需要的 cuboid 一次算好并写入存储，"
-  "查询阶段先判断这次查询涉及哪些维度，再定位到对应的 cuboid 直接读取。"
-  "数据源通常取自 Hive，存储通常使用 HBase，构建引擎可以用 MapReduce 或 Spark。"
-  "同类的列式方案还有 Druid 与 ClickHouse，思路相近，都是以额外的存储空间与构建时间换取查询响应时间。")
-P("国内在医药流通与医院信息化领域积累了大量处方数据，分析需求集中在合理用药监测、"
-  "药品销售结构与疾病谱统计三个方向。早期做法以固定报表为主，报表口径写死在存储过程里，"
-  "业务一旦要求换一个维度组合就要重新开发。近年来把维度建模与预计算引入业务分析逐渐常见，"
-  "同时数据治理问题也暴露得更明显，主数据不统一、时间覆盖不足、维表缺失都会直接影响结论，"
-  "这些问题在技术方案里没有位置，却决定了分析结果能不能用。")
+  "缺点是维度一多，按任意组合聚合的代价会随数据量线性上升，联机分析处理正是在这个矛盾上展开的{{3}}。")
+P("为降低聚合代价，工程上出现了预计算思路。Apache Kylin 由 eBay 研发，2014 年 11 月进入 Apache 基金会"
+  "孵化器，2015 年 12 月成为顶级项目{{4}}。它的核心是把多维组合提前物化，每一个维度组合对应一个 cuboid，"
+  "构建阶段把所有需要的 cuboid 一次算好并写入存储，查询阶段先判断这次查询涉及哪些维度，"
+  "再定位到对应的 cuboid 直接读取{{9}}。数据源通常取自 Hive，存储通常使用 HBase，构建引擎可以用 MapReduce "
+  "或 Spark。同类的列式方案还有 Druid{{5}} 与 ClickHouse{{6}}，思路相近，都是以额外的存储空间与构建时间"
+  "换取查询响应时间。")
+P("国内在医药流通与医院信息化领域积累了大量处方数据，分析需求集中在合理用药监测、药品销售结构与"
+  "疾病谱统计三个方向，药品不良反应监测年度报告每年汇总全国上报的病例，是这一类分析的主要数据来源之一{{7}}。"
+  "在管理要求上，六部门联合印发的关于加强医疗机构药事管理促进合理用药的意见对处方审核、"
+  "用药监测与处方点评提出了明确要求{{8}}，从制度上把处方数据从记录变成了需要持续分析的对象。"
+  "早期做法以固定报表为主，报表口径写死在存储过程里，业务一旦要求换一个维度组合就要重新开发。"
+  "近年来把维度建模与预计算引入业务分析逐渐常见，同时数据治理问题也暴露得更明显，"
+  "主数据不统一、时间覆盖不足、维表缺失都会直接影响结论，这些问题在技术方案里没有位置，"
+  "却决定了分析结果能不能用。")
 P("本项目取的是这条主流路线，但没有完全照搬实训资料给出的通用步骤。资料给出的路线是把原始文件"
   "转成 SequenceFile 写入 HBase 作为明细存储，用 Hive 外部表映射，Kylin 选取全部字段建立方体，"
   "后端统一查询 Kylin，前端部署在独立容器。实际执行时遇到两处硬约束，一是 HBase 自带的 Hadoop "
   "客户端版本与集群不一致，批量导入无法完成；二是按全部字段建立方体会让维度组合达到千万级，"
-  "不具备可行性。因此把明细存储改为 HDFS 与 MySQL 双写，把立方体维度收缩到 8 个低基数维度，"
-  "并在后端加入双引擎切换。这些调整在第三章逐项说明，它们是在本项目的环境与数据条件下"
-  "能够跑通并被复核的选择，不构成对通用路线的否定。")
+  "不具备可行性，cuboid 数量随维度数按指数增长的规律在 Kylin 的建模文档中有明确说明{{9}}。"
+  "因此把明细存储改为 HDFS 与 MySQL 双写，把立方体维度收缩到 8 个低基数维度，并在后端加入双引擎切换。"
+  "这些调整在第三章逐项说明，它们是在本项目的环境与数据条件下能够跑通并被复核的选择，"
+  "不构成对通用路线的否定。")
 
 # ================================================================ 二、完成内容成果
 H1("二、完成内容成果")
@@ -918,8 +936,42 @@ P("最后一步是验证。拿一份非医药行业的数据走一遍这条流�
   "这一步既是后续计划的验收方式，也是对前面所有工作的检验。")
 
 
-# ================================================================ 六、附录
-H1("六、附录　系统截图与接口返回")
+# ================================================================ 六、参考文献
+H1("六、参考文献")
+REFS = [
+    "KIMBALL R, ROSS M. The data warehouse toolkit: the definitive guide to dimensional modeling[M]. "
+    "3rd ed. Indianapolis: John Wiley & Sons, 2013.",
+    "INMON W H. Building the data warehouse[M]. 4th ed. Indianapolis: John Wiley & Sons, 2005.",
+    "王珊, 萨师煊. 数据库系统概论[M]. 5版. 北京: 高等教育出版社, 2014.",
+    "The Apache Software Foundation. The Apache Software Foundation announces Apache Kylin as a "
+    "top-level project[EB/OL]. (2015-12-08)[2026-11-15]. "
+    "https://blogsarchive.apache.org/foundation/entry/the_apache_software_foundation_announces85.",
+    "YANG F, TSCHETTER E, LEAUTE X, et al. Druid: a real-time analytical data store[C]//Proceedings of "
+    "the 2014 ACM SIGMOD International Conference on Management of Data. New York: ACM, 2014: 157-168.",
+    "SCHULZE R, SCHREIBER T, YATSISHIN I, et al. ClickHouse: lightning fast analytics for everyone[J]. "
+    "Proceedings of the VLDB Endowment, 2024, 17(12). DOI:10.14778/3685800.3685802.",
+    "国家药品监督管理局. 国家药品不良反应监测年度报告（2023年）[EB/OL]. (2024-03-26)[2026-11-15]. "
+    "https://www.nmpa.gov.cn/xxgk/fgwj/qita/20240326161403166.html.",
+    "卫生健康委, 教育部, 财政部, 等. 关于加强医疗机构药事管理促进合理用药的意见[EB/OL]. "
+    "(2020-02-21)[2026-11-15]. https://www.gov.cn/gongbao/content/2020/content_5522549.htm.",
+    "Apache Software Foundation. Apache Kylin documentation[EB/OL]. [2026-11-15]. "
+    "https://kylin.apache.org/docs/.",
+]
+for _i, _ref in enumerate(REFS, 1):
+    _p = doc.add_paragraph()
+    _pf = _p.paragraph_format
+    _pf.first_line_indent = Cm(-0.95)
+    _pf.left_indent = Cm(0.95)
+    _pf.space_before = Pt(0)
+    _pf.space_after = Pt(4)
+    _pf.line_spacing = 1.1
+    _p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    _r = _p.add_run("[%d] %s" % (_i, _ref))
+    set_font(_r, size=10.5)
+
+# ================================================================ 七、附录
+_h = H1("七、附录　系统截图与接口返回")
+_h.paragraph_format.page_break_before = True
 H2("（一）三套页面的分栏截图")
 P("随项目提交的十二张图表截图为三套页面在不同滚动位置的分栏画面，下图按原始顺序拼合。"
   "首页部分给出城市等级、年龄分布、药品前十与各省份四张图，适应症页部分给出组合关系图、"
